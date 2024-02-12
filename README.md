@@ -5,6 +5,7 @@ Automatically creates releases based on pull requests and labels.
 ## Specifications and practices
 
 Auto-Release follows:
+Test
 
 - [SemVer 2.0.0 specifications](https://semver.org)
 - [GitHub Flow specifications](https://docs.github.com/en/get-started/using-github/github-flow)
