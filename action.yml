@@ -28,6 +28,9 @@ runs:
         GITHUB_CONTEXT: ${{ toJson(github) }}
         JOB_CONTEXT: ${{ toJson(job) }}
         RUNNER_CONTEXT: ${{ toJson(runner) }}
+        AutoPatching: ${{ inputs.AutoPatching }}
+        IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
+        VersionPrefix: ${{ inputs.VersionPrefix }}
       run: |
         # Auto-Release
         Write-Host "::group::Utilities"
@@ -59,9 +62,9 @@ runs:
         Write-Host $env:RUNNER_CONTEXT
         Write-Host '::endgroup::'
 
-        $autoPatching = '${{ inputs.AutoPatching }}' -eq 'true'
-        $incrementalPrerelease = '${{ inputs.IncrementalPrerelease }}' -eq 'true'
-        $versionPrefix = '${{ inputs.VersionPrefix }}'
+        $autoPatching = $env:AutoPatching -eq 'true'
+        $incrementalPrerelease = $env:IncrementalPrerelease -eq 'true'
+        $versionPrefix = $env:VersionPrefix
         Write-Host "-------------------------------------------------"
         Write-Host "Auto patching enabled:          [$autoPatching]"
         Write-Host "Incremental prerelease enabled: [$autoPatching]"
