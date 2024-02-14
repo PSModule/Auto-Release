@@ -84,7 +84,11 @@ if ($mergedToMain) {
 }
 
 Write-Output '::group::Get releases'
-$releases = gh release list --json createdAt, isDraft, isLatest, isPrerelease, name, publishedAt, tagName | ConvertFrom-Json
+$releases = gh release list --json 'createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName' | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to list all releases for the repo."
+    exit $LASTEXITCODE
+}
 $releases | Format-List
 Write-Output '::endgroup::'
 
@@ -175,11 +179,28 @@ if ($preRelease) {
 }
 
 gh release create $newVersion --title $newVersion --generate-notes
-git tag -f ('{0}{1}' -f $versionPrefix, $major) 'main'
-git tag -f ('{0}{1}.{2}' -f $versionPrefix, $major, $minor) 'main'
-git push origin --tags --force
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to create the release [$newVersion]."
+    exit $LASTEXITCODE
+}
+
+$majorTag = ('{0}{1}' -f $versionPrefix, $major)
+git tag -f $majorTag 'main'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to create major tag [$majorTag]."
+    exit $LASTEXITCODE
+}
+
+$minorTag = ('{0}{1}.{2}' -f $versionPrefix, $major, $minor)
+git tag -f $minorTag 'main'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to create minor tag [$minorTag]."
+    exit $LASTEXITCODE
+}
+
+git push origin --tags --force
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to push tags."
     exit $LASTEXITCODE
 }
 Write-Output '::endgroup::'
@@ -187,7 +208,12 @@ Write-Output '::endgroup::'
 Write-Output "::group::Cleanup prereleases for [$preReleaseName]"
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
 foreach ($rel in $prereleasesToCleanup) {
-    Write-Output "Deleting prerelease:            [$($rel.tagName)]."
+    $relTagName = $rel.tagName
+    Write-Output "Deleting prerelease:            [$relTagName]."
     gh release delete $rel.tagName --cleanup-tag --yes
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to delete release [$relTagName]."
+        exit $LASTEXITCODE
+    }
 }
 Write-Output '::endgroup::'
