@@ -24,6 +24,10 @@ runs:
   steps:
     - name: Auto-Release
       shell: pwsh
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+        JOB_CONTEXT: ${{ toJson(job) }}
+        RUNNER_CONTEXT: ${{ toJson(runner) }}
       run: |
         # Auto-Release
         Write-Host "::group::Utilities"
@@ -41,6 +45,18 @@ runs:
 
         Write-Host "::group::Environment variables"
         Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
+        Write-Host '::endgroup::'
+
+        Write-Host "::group::GitHub context"
+        Write-Host $env:GITHUB_CONTEXT
+        Write-Host '::endgroup::'
+
+        Write-Host "::group::Job context"
+        Write-Host $env:JOB_CONTEXT
+        Write-Host '::endgroup::'
+
+        Write-Host "::group::Runner context"
+        Write-Host $env:RUNNER_CONTEXT
         Write-Host '::endgroup::'
 
         $autoPatching = '${{ inputs.AutoPatching }}' -eq 'true'
