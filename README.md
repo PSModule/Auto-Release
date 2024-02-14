@@ -28,7 +28,7 @@ Add a workflow in you repository using the following example:
 name: Auto-Release
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
     types:
