@@ -33,4 +33,4 @@ runs:
         IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
         VersionPrefix: ${{ inputs.VersionPrefix }}
         DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
-      run: ./scripts/main.ps1
+      run: scripts/main.ps1
