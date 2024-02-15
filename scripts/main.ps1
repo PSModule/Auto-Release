@@ -96,13 +96,18 @@ Write-Output '-------------------------------------------------'
 Write-Output "Latest version:                 [$latestVersion]"
 Write-Output '-------------------------------------------------'
 
-$majorRelease = $labels -Contains 'major' -or $labels -Contains 'breaking'
-$minorRelease = $labels -Contains 'minor' -or $labels -Contains 'feature' -or $labels -Contains 'improvement'
-$patchRelease = $labels -Contains 'patch' -or $labels -Contains 'fix' -or $labels -Contains 'bug'
-$preRelease = $labels -Contains 'prerelease'
-$createPrerelease = $preRelease -and -not $createRelease
+$majorTags = @('major', 'breaking')
+$minorTags = @('minor', 'feature', 'improvement')
+$patchTags = @('patch', 'fix', 'bug')
+
+$majorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $majorTags -IncludeEqual -ExcludeDifferent).Count -gt 0
+$minorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $minorTags -IncludeEqual -ExcludeDifferent).Count -gt 0
+$patchRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $patchTags -IncludeEqual -ExcludeDifferent).Count -gt 0
+
 $createRelease = $pull_request.base.ref -eq 'main' -and $pull_request.merged -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and $pull_request.merged -eq 'False'
+$preRelease = $labels -Contains 'prerelease'
+$createPrerelease = $preRelease -and -not $createRelease
 
 Write-Output '-------------------------------------------------'
 Write-Output "Create a major release:         [$majorRelease]"
