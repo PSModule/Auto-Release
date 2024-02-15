@@ -100,16 +100,18 @@ $majorRelease = $labels -Contains 'major' -or $labels -Contains 'breaking'
 $minorRelease = $labels -Contains 'minor' -or $labels -Contains 'feature' -or $labels -Contains 'improvement'
 $patchRelease = $labels -Contains 'patch' -or $labels -Contains 'fix' -or $labels -Contains 'bug'
 $preRelease = $labels -Contains 'prerelease'
-Write-Output '-------------------------------------------------'
-Write-Output "Is a major release:             [$majorRelease]"
-Write-Output "Is a minor release:             [$minorRelease]"
-Write-Output "Is a patch release:             [$patchRelease]"
-Write-Output "Is a prerelease:                [$preRelease]"
-Write-Output '-------------------------------------------------'
-
 $createPrerelease = $preRelease -and -not $createRelease
 $createRelease = $pull_request.base.ref -eq 'main' -and $pull_request.merged -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and $pull_request.merged -eq 'False'
+
+Write-Output '-------------------------------------------------'
+Write-Output "Create a major release:         [$majorRelease]"
+Write-Output "Create a minor release:         [$minorRelease]"
+Write-Output "Create a patch release:         [$patchRelease]"
+Write-Output "Create a release:               [$createRelease]"
+Write-Output "Create a prerelease:            [$createPrerelease]"
+Write-Output "Closed pull request:            [$closedPullRequest]"
+Write-Output '-------------------------------------------------'
 
 if ($createPrerelease -or $createRelease) {
     Write-Output '::group::Calculate new version'
