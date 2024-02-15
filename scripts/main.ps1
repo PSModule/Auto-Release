@@ -142,7 +142,7 @@ if ($createPrerelease -or $createRelease) {
         $newVersion = "$newVersion-$preReleaseName"
         Write-Output "Partly new version: [$newVersion]"
 
-        if ($env:DatePrereleaseFormat | IsNotNullOrEmpty) {
+        if ($datePrereleaseFormat | IsNotNullOrEmpty) {
             Write-Output "Using date-based prerelease: [$datePrereleaseFormat]."
             $newVersion = $newVersion + '.' + (Get-Date -Format $datePrereleaseFormat)
             Write-Output "Partly new version: [$newVersion]"

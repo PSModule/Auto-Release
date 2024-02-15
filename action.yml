@@ -1,6 +1,6 @@
 name: Auto-Release (by PSModule)
 description: Automatically creates releases based on pull requests and labels.
-
+author: PSModule
 branding:
   icon: activity
   color: blue
@@ -43,6 +43,8 @@ runs:
       env:
         AutoCleanup: ${{ inputs.AutoCleanup }}
         AutoPatching: ${{ inputs.AutoPatching }}
+        CreateMajorTag: ${{ inputs.CreateMajorTag }}
+        CreateMinorTag: ${{ inputs.CreateMinorTag }}
         DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
         IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
         VersionPrefix: ${{ inputs.VersionPrefix }}
