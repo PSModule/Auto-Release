@@ -19,6 +19,7 @@ The action have the following parameters:
 | --- | --- | --- | --- |
 | `AutoPatching` | Control wether to automatically handle patches. If disabled, the action will only create a patch release if the pull request has a 'patch' label. | `true` | false |
 | `IncrementalPrerelease` | Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch. | `true` | false |
+| `DataPrereleaseFormat` | The format to use for the prerelease number using [.NET DateTime format strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings). | `''` | false |
 | `VersionPrefix` | The prefix to use for the version number. | `v` | false |
 
 ### Example
