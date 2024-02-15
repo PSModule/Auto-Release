@@ -70,32 +70,6 @@ $labels += $pull_request.labels.name
 $labels | Format-List
 Write-Output '::endgroup::'
 
-Write-Output '::group::Get releases'
-$releases = gh release list --json 'createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName' | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) {
-    Write-Error 'Failed to list all releases for the repo.'
-    exit $LASTEXITCODE
-}
-$releases | Format-List
-Write-Output '::endgroup::'
-
-Write-Output '::group::Get latest version'
-$latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
-$latestRelease | Format-List
-$latestVersionString = $latestRelease.tagName
-if ($latestVersionString | IsNotNullOrEmpty) {
-    $latestVersion = $latestVersionString | ConvertTo-SemVer
-    Write-Output '-------------------------------------------------'
-    Write-Output 'Latest version:'
-    $latestVersion | Format-Table
-    $latestVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $latestVersion.Major, $latestVersion.Minor, $latestVersion.Patch
-}
-Write-Output '::endgroup::'
-
-Write-Output '-------------------------------------------------'
-Write-Output "Latest version:                 [$latestVersion]"
-Write-Output '-------------------------------------------------'
-
 $majorTags = @('major', 'breaking')
 $minorTags = @('minor', 'feature', 'improvement')
 $patchTags = @('patch', 'fix', 'bug')
@@ -119,6 +93,32 @@ Write-Output "Closed pull request:            [$closedPullRequest]"
 Write-Output '-------------------------------------------------'
 
 if ($createPrerelease -or $createRelease) {
+    Write-Output '::group::Get releases'
+    $releases = gh release list --json 'createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName' | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error 'Failed to list all releases for the repo.'
+        exit $LASTEXITCODE
+    }
+    $releases | Format-List
+    Write-Output '::endgroup::'
+
+    Write-Output '::group::Get latest version'
+    $latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
+    $latestRelease | Format-List
+    $latestVersionString = $latestRelease.tagName
+    if ($latestVersionString | IsNotNullOrEmpty) {
+        $latestVersion = $latestVersionString | ConvertTo-SemVer
+        Write-Output '-------------------------------------------------'
+        Write-Output 'Latest version:'
+        $latestVersion | Format-Table
+        $latestVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $latestVersion.Major, $latestVersion.Minor, $latestVersion.Patch
+    }
+    Write-Output '::endgroup::'
+
+    Write-Output '-------------------------------------------------'
+    Write-Output "Latest version:                 [$latestVersion]"
+    Write-Output '-------------------------------------------------'
+
     Write-Output '::group::Calculate new version'
     $version = $latestVersion | ConvertTo-SemVer
     $major = $version.Major
