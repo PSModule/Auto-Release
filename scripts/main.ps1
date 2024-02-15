@@ -17,10 +17,13 @@ Write-Output '::endgroup::'
 
 $autoPatching = $env:AutoPatching -eq 'true'
 $incrementalPrerelease = $env:IncrementalPrerelease -eq 'true'
+$datePrereleaseFormat = $env:DatePrereleaseFormat
 $versionPrefix = $env:VersionPrefix
+
 Write-Output '-------------------------------------------------'
 Write-Output "Auto patching enabled:          [$autoPatching]"
-Write-Output "Incremental prerelease enabled: [$autoPatching]"
+Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
+Write-Output "Date-based prerelease format:   [$datePrerelease]"
 Write-Output "Version prefix:                 [$versionPrefix]"
 Write-Output '-------------------------------------------------'
 
@@ -138,6 +141,12 @@ if ($preRelease) {
     Write-Output "Adding a prerelease tag to the version using the branch name [$preReleaseName]."
     $newVersion = "$newVersion-$preReleaseName"
     Write-Output "Partly new version: [$newVersion]"
+
+    if ($env:DatePrereleaseFormat | IsNotNullOrEmpty) {
+        Write-Output "Using date-based prerelease: [$datePrereleaseFormat]."
+        $newVersion = $newVersion + '.' + (Get-Date -Format 'yyyyMMddHHmm')
+        Write-Output "Partly new version: [$newVersion]"
+    }
 
     if ($incrementalPrerelease) {
         $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" } | Sort-Object -Descending -Property tagName
