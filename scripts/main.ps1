@@ -101,8 +101,8 @@ $minorTags = @('minor', 'feature', 'improvement')
 $patchTags = @('patch', 'fix', 'bug')
 
 $majorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $majorTags -IncludeEqual -ExcludeDifferent).Count -gt 0
-$minorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $minorTags -IncludeEqual -ExcludeDifferent).Count -gt 0
-$patchRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $patchTags -IncludeEqual -ExcludeDifferent).Count -gt 0
+$minorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $minorTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease
+$patchRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $patchTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
 
 $createRelease = $pull_request.base.ref -eq 'main' -and $pull_request.merged -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and $pull_request.merged -eq 'False'
