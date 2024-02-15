@@ -107,9 +107,9 @@ Write-Output "Is a patch release:             [$patchRelease]"
 Write-Output "Is a prerelease:                [$preRelease]"
 Write-Output '-------------------------------------------------'
 
+$createPrerelease = $preRelease -and -not $createRelease
 $createRelease = $pull_request.base.ref -eq 'main' -and $pull_request.merged -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and $pull_request.merged -eq 'False'
-$createPrerelease = $preRelease -and -not $createRelease
 
 if ($createPrerelease -or $createRelease) {
     Write-Output '::group::Calculate new version'
@@ -137,7 +137,7 @@ if ($createPrerelease -or $createRelease) {
     $newVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $major, $minor, $patch
     Write-Output "Partly new version: [$newVersion]"
 
-    if ($preRelease) {
+    if ($createPrerelease) {
         Write-Output "Adding a prerelease tag to the version using the branch name [$preReleaseName]."
         $newVersion = "$newVersion-$preReleaseName"
         Write-Output "Partly new version: [$newVersion]"
@@ -168,7 +168,7 @@ if ($createPrerelease -or $createRelease) {
     Write-Output '-------------------------------------------------'
 
     Write-Output "::group::Create new release [$newVersion]"
-    if ($preRelease) {
+    if ($createPrerelease) {
         $releaseExists = $releases.tagName -Contains $newVersion
         if ($releaseExists -and -not $incrementalPrerelease) {
             Write-Output 'Release already exists, recreating.'
