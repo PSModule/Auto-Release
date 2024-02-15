@@ -23,7 +23,7 @@ $versionPrefix = $env:VersionPrefix
 Write-Output '-------------------------------------------------'
 Write-Output "Auto patching enabled:          [$autoPatching]"
 Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
-Write-Output "Date-based prerelease format:   [$datePrerelease]"
+Write-Output "Date-based prerelease format:   [$datePrereleaseFormat]"
 Write-Output "Version prefix:                 [$versionPrefix]"
 Write-Output '-------------------------------------------------'
 
@@ -144,7 +144,7 @@ if ($preRelease) {
 
     if ($env:DatePrereleaseFormat | IsNotNullOrEmpty) {
         Write-Output "Using date-based prerelease: [$datePrereleaseFormat]."
-        $newVersion = $newVersion + '.' + (Get-Date -Format 'yyyyMMddHHmm')
+        $newVersion = $newVersion + '.' + (Get-Date -Format $datePrereleaseFormat)
         Write-Output "Partly new version: [$newVersion]"
     }
 
