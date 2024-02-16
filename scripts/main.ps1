@@ -14,22 +14,22 @@ Write-Output '::endgroup::'
 Write-Output '::group::Install - powershell-yaml'
 Install-PSResource -Name powershell-yaml -TrustRepository
 Write-Output '-------------------------------------------------'
-Get-PSResource -Name Utilities | Format-Table
+Get-PSResource -Name powershell-yaml | Format-Table
 Write-Output '-------------------------------------------------'
 Write-Output 'Get commands'
-Get-Command -Module Utilities | Format-Table
+Get-Command -Module powershell-yaml | Format-Table
 Write-Output '-------------------------------------------------'
 Write-Output 'Get aliases'
-Get-Alias | Where-Object Source -EQ 'Utilities' | Format-Table
+Get-Alias | Where-Object Source -EQ 'powershell-yaml' | Format-Table
 Write-Output '-------------------------------------------------'
 Write-Output '::endgroup::'
 
-Write-Output "::group::Read configuration [$env:ConfigurationPath]"
-if (-not (Test-Path -Path $env:ConfigurationPath -PathType Leaf)) {
-    Write-Error "Configuration file not found at [$env:ConfigurationPath]"
+Write-Output "::group::Read configuration [$env:ConfigurationFile]"
+if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
+    Write-Error "Configuration file not found at [$env:ConfigurationFile]"
     exit 1
 }
-$configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationPath -Raw)
+$configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationFile -Raw)
 Write-Output '::endgroup::'
 
 $autoCleanup = $configuration.AutoCleanup -eq 'true'
