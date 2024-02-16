@@ -30,7 +30,6 @@ if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
     exit 1
 }
 $configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationFile -Raw)
-Write-Output '::endgroup::'
 
 $autoCleanup = $configuration.AutoCleanup -eq 'true'
 $autoPatching = $configuration.AutoPatching -eq 'true'
@@ -49,16 +48,17 @@ Write-Output "Date-based prerelease format:   [$datePrereleaseFormat]"
 Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
 Write-Output "Version prefix:                 [$versionPrefix]"
 Write-Output '-------------------------------------------------'
+Write-Output '::endgroup::'
 
-$githubEventJson = Get-Content $env:GITHUB_EVENT_PATH
-$githubEvent = $githubEventJson | ConvertFrom-Json
-$pull_request = $githubEvent.pull_request
 
 Write-Output '::group::Event information - JSON'
+$githubEventJson = Get-Content $env:GITHUB_EVENT_PATH
 $githubEventJson | Format-List
 Write-Output '::endgroup::'
 
 Write-Output '::group::Event information - Object'
+$githubEvent = $githubEventJson | ConvertFrom-Json
+$pull_request = $githubEvent.pull_request
 $githubEvent | Format-List
 Write-Output '::endgroup::'
 
