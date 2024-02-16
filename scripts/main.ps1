@@ -31,12 +31,12 @@ if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
 }
 $configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationFile -Raw)
 
-$autoCleanup = $configuration.AutoCleanup -eq 'true'
-$autoPatching = $configuration.AutoPatching -eq 'true'
-$createMajorTag = $configuration.CreateMajorTag -eq 'true'
-$createMinorTag = $configuration.CreateMinorTag -eq 'true'
+$autoCleanup = ($configuration.AutoCleanup | IsNotNullOrEmpty) ? $configuration.AutoCleanup -eq 'true' : $true
+$autoPatching = ($configuration.AutoPatching | IsNotNullOrEmpty) ? $configuration.AutoPatching -eq 'true' : $true
+$createMajorTag = ($configuration.CreateMajorTag | IsNotNullOrEmpty) ? $configuration.CreateMajorTag -eq 'true' : $true
+$createMinorTag = ($configuration.CreateMinorTag | IsNotNullOrEmpty) ? $configuration.CreateMinorTag -eq 'true' : $true
 $datePrereleaseFormat = $configuration.DatePrereleaseFormat
-$incrementalPrerelease = $configuration.IncrementalPrerelease -eq 'true'
+$incrementalPrerelease = ($configuration.IncrementalPrerelease | IsNotNullOrEmpty) ? $configuration.IncrementalPrerelease -eq 'true' : $true
 $versionPrefix = $configuration.VersionPrefix
 
 Write-Output '-------------------------------------------------'
