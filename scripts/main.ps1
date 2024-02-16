@@ -1,4 +1,4 @@
-Write-Output '::group::Utilities'
+Write-Output '::group::Install - Utilities'
 Install-PSResource -Name Utilities -TrustRepository
 Write-Output '-------------------------------------------------'
 Get-PSResource -Name Utilities | Format-Table
@@ -11,17 +11,34 @@ Get-Alias | Where-Object Source -EQ 'Utilities' | Format-Table
 Write-Output '-------------------------------------------------'
 Write-Output '::endgroup::'
 
-Write-Output '::group::Environment variables'
-Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
+Write-Output '::group::Install - powershell-yaml'
+Install-PSResource -Name powershell-yaml -TrustRepository
+Write-Output '-------------------------------------------------'
+Get-PSResource -Name Utilities | Format-Table
+Write-Output '-------------------------------------------------'
+Write-Output 'Get commands'
+Get-Command -Module Utilities | Format-Table
+Write-Output '-------------------------------------------------'
+Write-Output 'Get aliases'
+Get-Alias | Where-Object Source -EQ 'Utilities' | Format-Table
+Write-Output '-------------------------------------------------'
 Write-Output '::endgroup::'
 
-$autoCleanup = $env:AutoCleanup -eq 'true'
-$autoPatching = $env:AutoPatching -eq 'true'
-$createMajorTag = $env:CreateMajorTag -eq 'true'
-$createMinorTag = $env:CreateMinorTag -eq 'true'
-$datePrereleaseFormat = $env:DatePrereleaseFormat
-$incrementalPrerelease = $env:IncrementalPrerelease -eq 'true'
-$versionPrefix = $env:VersionPrefix
+Write-Output "::group::Read configuration [$env:ConfigurationPath]"
+if (-not (Test-Path -Path $env:ConfigurationPath -PathType Leaf)) {
+    Write-Error "Configuration file not found at [$env:ConfigurationPath]"
+    exit 1
+}
+$configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationPath -Raw)
+Write-Output '::endgroup::'
+
+$autoCleanup = $configuration.AutoCleanup -eq 'true'
+$autoPatching = $configuration.AutoPatching -eq 'true'
+$createMajorTag = $configuration.CreateMajorTag -eq 'true'
+$createMinorTag = $configuration.CreateMinorTag -eq 'true'
+$datePrereleaseFormat = $configuration.DatePrereleaseFormat
+$incrementalPrerelease = $configuration.IncrementalPrerelease -eq 'true'
+$versionPrefix = $configuration.VersionPrefix
 
 Write-Output '-------------------------------------------------'
 Write-Output "Auto cleanup enabled:           [$autoCleanup]"
@@ -74,21 +91,22 @@ $majorTags = @('major', 'breaking')
 $minorTags = @('minor', 'feature', 'improvement')
 $patchTags = @('patch', 'fix', 'bug')
 
-$majorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $majorTags -IncludeEqual -ExcludeDifferent).Count -gt 0
-$minorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $minorTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease
-$patchRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $patchTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
-
 $createRelease = $pull_request.base.ref -eq 'main' -and $pull_request.merged -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and $pull_request.merged -eq 'False'
 $preRelease = $labels -Contains 'prerelease'
 $createPrerelease = $preRelease -and -not $createRelease
 
+$majorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $majorTags -IncludeEqual -ExcludeDifferent).Count -gt 0
+$minorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $minorTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease
+$patchRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $patchTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
+
+
 Write-Output '-------------------------------------------------'
+Write-Output "Create a release:               [$createRelease]"
+Write-Output "Create a prerelease:            [$createPrerelease]"
 Write-Output "Create a major release:         [$majorRelease]"
 Write-Output "Create a minor release:         [$minorRelease]"
 Write-Output "Create a patch release:         [$patchRelease]"
-Write-Output "Create a release:               [$createRelease]"
-Write-Output "Create a prerelease:            [$createPrerelease]"
 Write-Output "Closed pull request:            [$closedPullRequest]"
 Write-Output '-------------------------------------------------'
 
