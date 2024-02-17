@@ -33,7 +33,7 @@ inputs:
   IncrementalPrerelease:
     description: Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch.
     required: false
-    default: 'false'
+    default: 'true'
   VersionPrefix:
     description: The prefix to use for the version number.
     required: false

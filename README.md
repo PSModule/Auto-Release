@@ -22,7 +22,7 @@ The action have the following parameters:
 | `CreateMajorTag` | Control wether to create a tag for major releases. | `true` | false |
 | `CreateMinorTag` | Control wether to create a tag for minor releases. | `true` | false |
 | `DatePrereleaseFormat` | The format to use for the prerelease number using [.NET DateTime format strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings). | `''` | false |
-| `IncrementalPrerelease` | Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch. | `false` | false |
+| `IncrementalPrerelease` | Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch. | `true` | false |
 | `VersionPrefix` | The prefix to use for the version number. | `v` | false |
 
 ### Example
