@@ -88,7 +88,7 @@ $pull_request | Format-List
 Write-Output '::endgroup::'
 
 Write-Output '::group::Pull request - Labels'
-$labels = @('')
+$labels = @('...')
 $labels += $pull_request.labels.name
 $labels | Format-List
 Write-Output '::endgroup::'
