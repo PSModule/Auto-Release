@@ -45,6 +45,9 @@ The action have the following parameters:
 | `CreateMinorTag` | Control wether to create a tag for minor releases. | `true` | false |
 | `DatePrereleaseFormat` | The format to use for the prerelease number using [.NET DateTime format strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings). | `''` | false |
 | `IncrementalPrerelease` | Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch. | `true` | false |
+| `MajorLabels` | The labels to use for major releases. | `major, breaking` | false |
+| `MinorLabels` | The labels to use for minor releases. | `minor, feature, improvement` | false |
+| `PatchLabels` | The labels to use for patch releases. | `patch, fix, bug` | false |
 | `VersionPrefix` | The prefix to use for the version number. | `v` | false |
 
 ### Configuration file

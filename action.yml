@@ -34,10 +34,6 @@ inputs:
     description: Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch.
     required: false
     default: 'true'
-  VersionPrefix:
-    description: The prefix to use for the version number.
-    required: false
-    default: 'v'
   MajorLabels:
     description: The labels to use for major releases.
     required: false
@@ -50,6 +46,10 @@ inputs:
     description: The labels to use for patch releases.
     required: false
     default: 'patch, fix, bug'
+  VersionPrefix:
+    description: The prefix to use for the version number.
+    required: false
+    default: 'v'
 
 runs:
   using: composite
