@@ -210,7 +210,7 @@ if ($createPrerelease -or $createRelease) {
             }
         }
 
-        gh release create $newVersion --title $newVersion --generate-notes --prerelease
+        gh release create $newVersion --title $newVersion --target $pull_request.head.ref --generate-notes --prerelease
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Failed to create the release [$newVersion]."
             exit $LASTEXITCODE
