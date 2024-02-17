@@ -72,6 +72,7 @@ if (-not $isPullRequest) {
     'A release should not be created in this context. Exiting.'
     return
 }
+
 Write-Output '-------------------------------------------------'
 Write-Output "Is a pull request event:        [$isPullRequest]"
 Write-Output "Action type:                    [$($githubEvent.action)]"
@@ -96,8 +97,8 @@ $majorTags = @('major', 'breaking')
 $minorTags = @('minor', 'feature', 'improvement')
 $patchTags = @('patch', 'fix', 'bug')
 
-$createRelease = $pull_request.base.ref -eq 'main' -and $pull_request.merged -eq 'True'
-$closedPullRequest = $pull_request.state -eq 'closed' -and $pull_request.merged -eq 'False'
+$createRelease = $pull_request.base.ref -eq 'main' -and ($pull_request.merged).ToString() -eq 'True'
+$closedPullRequest = $pull_request.state -eq 'closed' -and ($pull_request.merged).ToString() -eq 'False'
 $preRelease = $labels -Contains 'prerelease'
 $createPrerelease = $preRelease -and -not $createRelease
 
