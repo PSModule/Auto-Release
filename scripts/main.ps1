@@ -205,6 +205,7 @@ if ($createPrerelease -or $createRelease) {
             gh release delete $newVersion --cleanup-tag --yes
             if ($LASTEXITCODE -ne 0) {
                 Write-Error "Failed to delete the release [$newVersion]."
+                Write-Output "::error::Failed to delete the release [$newVersion]."
                 exit $LASTEXITCODE
             }
         }
@@ -212,6 +213,7 @@ if ($createPrerelease -or $createRelease) {
         gh release create $newVersion --title $newVersion --generate-notes --prerelease
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Failed to create the release [$newVersion]."
+            Write-Output "::error::Failed to create the release [$newVersion]."
             exit $LASTEXITCODE
         }
         return
@@ -220,14 +222,17 @@ if ($createPrerelease -or $createRelease) {
     gh release create $newVersion --title $newVersion --generate-notes
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Failed to create the release [$newVersion]."
+        Write-Output "::error::Failed to create the release [$newVersion]."
         exit $LASTEXITCODE
     }
+    Write-Output "::notice::Release created - [$newVersion]"
 
     if ($createMajorTag) {
         $majorTag = ('{0}{1}' -f $versionPrefix, $major)
         git tag -f $majorTag 'main'
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Failed to create major tag [$majorTag]."
+            Write-Output "::error::Failed to create major tag [$majorTag]."
             exit $LASTEXITCODE
         }
     }
@@ -237,6 +242,7 @@ if ($createPrerelease -or $createRelease) {
         git tag -f $minorTag 'main'
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Failed to create minor tag [$minorTag]."
+            Write-Output "::error::Failed to create minor tag [$minorTag]."
             exit $LASTEXITCODE
         }
     }
@@ -244,12 +250,14 @@ if ($createPrerelease -or $createRelease) {
     git push origin --tags --force
     if ($LASTEXITCODE -ne 0) {
         Write-Error 'Failed to push tags.'
+        Write-Output "::error::Failed to push tags."
         exit $LASTEXITCODE
     }
     Write-Output '::endgroup::'
 
 } else {
     Write-Output 'Skipping release creation.'
+    Write-Output"::notice::Skipping release creation."
 }
 
 if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
@@ -261,8 +269,10 @@ if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
         gh release delete $rel.tagName --cleanup-tag --yes
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Failed to delete release [$relTagName]."
+            Write-Output "::error::Failed to delete release [$relTagName]."
             exit $LASTEXITCODE
         }
+        Write-Output"::notice::Prerelease deleted - [$relTagName]"
     }
     Write-Output '::endgroup::'
 }
