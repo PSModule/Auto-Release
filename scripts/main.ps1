@@ -250,6 +250,8 @@ if ($createPrerelease -or $createRelease) {
     Write-Output 'Skipping release creation.'
 }
 
+Write-Output "::notice::Release created: [$newVersion]"
+
 Write-Output '::group::List prereleases using the same name'
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
 $prereleasesToCleanup | Select-Object -Property name, publishedAt,isDraft,isPrerelease,isLatest | Format-Table
