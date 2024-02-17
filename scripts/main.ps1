@@ -183,7 +183,7 @@ if ($createPrerelease -or $createRelease) {
                 $_ | Add-Member -MemberType NoteProperty -Name 'number' -Value ($_.tagName -Split '.')[-1] -PassThru
             } | Sort-Object -Property number -Descending
             $prereleases | Format-Table
-            
+
             if ($prereleases.count -gt 0) {
                 $latestPrereleaseVersion = ($prereleases[0].tagName | ConvertTo-SemVer) | Select-Object -ExpandProperty Prerelease
                 Write-Output "Latest prerelease:              [$latestPrereleaseVersion]"
