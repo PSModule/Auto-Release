@@ -78,7 +78,7 @@ $githubEvent | Format-List
 Write-Output '::endgroup::'
 
 $isPullRequest = $githubEvent.PSObject.Properties.Name -Contains 'pull_request'
-if (-not $isPullRequest) {
+if (-not ($isPullRequest -or $whatIf)) {
     'A release should not be created in this context. Exiting.'
     return
 }
