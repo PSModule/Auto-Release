@@ -44,9 +44,9 @@ $datePrereleaseFormat = ($configuration.DatePrereleaseFormat | IsNotNullOrEmpty)
 $incrementalPrerelease = ($configuration.IncrementalPrerelease | IsNotNullOrEmpty) ? $configuration.IncrementalPrerelease -eq 'true' : $env:IncrementalPrerelease -eq 'true'
 $versionPrefix = ($configuration.VersionPrefix | IsNotNullOrEmpty) ? $configuration.VersionPrefix : $env:VersionPrefix
 
-$majorLabels = (($configuration.MajorLabels | IsNotNullOrEmpty) ? $configuration.MajorLabels : $env:MajorLabels) -split ','
-$minorLabels = (($configuration.MinorLabels | IsNotNullOrEmpty) ? $configuration.MinorLabels : $env:MinorLabels) -split ','
-$patchLabels = (($configuration.PatchLabels | IsNotNullOrEmpty) ? $configuration.PatchLabels : $env:PatchLabels) -split ','
+$majorLabels = (($configuration.MajorLabels | IsNotNullOrEmpty) ? $configuration.MajorLabels : $env:MajorLabels) -split ',' | ForEach-Object { $_.Trim() }
+$minorLabels = (($configuration.MinorLabels | IsNotNullOrEmpty) ? $configuration.MinorLabels : $env:MinorLabels) -split ',' | ForEach-Object { $_.Trim() }
+$patchLabels = (($configuration.PatchLabels | IsNotNullOrEmpty) ? $configuration.PatchLabels : $env:PatchLabels) -split ',' | ForEach-Object { $_.Trim() }
 
 Write-Output '-------------------------------------------------'
 Write-Output "Auto cleanup enabled:           [$autoCleanup]"
