@@ -122,7 +122,7 @@ if ($createPrerelease -or $createRelease) {
         Write-Error 'Failed to list all releases for the repo.'
         exit $LASTEXITCODE
     }
-    $releases | Format-List
+    $releases | Select-Object -Property name, isDraft, isPrerelease, isLatest, publishedAt, createdAt | Format-Table
     Write-Output '::endgroup::'
 
     Write-Output '::group::Get latest version'
@@ -254,7 +254,7 @@ Write-Output "::notice::Release created: [$newVersion]"
 
 Write-Output '::group::List prereleases using the same name'
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
-$prereleasesToCleanup | Select-Object -Property name, publishedAt,isDraft,isPrerelease,isLatest | Format-Table
+$prereleasesToCleanup | Select-Object -Property name, publishedAt, isDraft, isPrerelease, isLatest | Format-Table
 Write-Output '::endgroup::'
 
 if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
