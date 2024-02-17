@@ -115,33 +115,33 @@ Write-Output "Create a patch release:         [$patchRelease]"
 Write-Output "Closed pull request:            [$closedPullRequest]"
 Write-Output '-------------------------------------------------'
 
+Write-Output '::group::Get releases'
+$releases = gh release list --json 'createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName' | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) {
+    Write-Error 'Failed to list all releases for the repo.'
+    exit $LASTEXITCODE
+}
+$releases | Select-Object -Property name, isPrerelease, isLatest, publishedAt | Format-Table
+Write-Output '::endgroup::'
+
+Write-Output '::group::Get latest version'
+$latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
+$latestRelease | Format-List
+$latestVersionString = $latestRelease.tagName
+if ($latestVersionString | IsNotNullOrEmpty) {
+    $latestVersion = $latestVersionString | ConvertTo-SemVer
+    Write-Output '-------------------------------------------------'
+    Write-Output 'Latest version:'
+    $latestVersion | Format-Table
+    $latestVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $latestVersion.Major, $latestVersion.Minor, $latestVersion.Patch
+}
+Write-Output '::endgroup::'
+
+Write-Output '-------------------------------------------------'
+Write-Output "Latest version:                 [$latestVersion]"
+Write-Output '-------------------------------------------------'
+
 if ($createPrerelease -or $createRelease) {
-    Write-Output '::group::Get releases'
-    $releases = gh release list --json 'createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName' | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error 'Failed to list all releases for the repo.'
-        exit $LASTEXITCODE
-    }
-    $releases | Select-Object -Property name, isPrerelease, isLatest, publishedAt | Format-Table
-    Write-Output '::endgroup::'
-
-    Write-Output '::group::Get latest version'
-    $latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
-    $latestRelease | Format-List
-    $latestVersionString = $latestRelease.tagName
-    if ($latestVersionString | IsNotNullOrEmpty) {
-        $latestVersion = $latestVersionString | ConvertTo-SemVer
-        Write-Output '-------------------------------------------------'
-        Write-Output 'Latest version:'
-        $latestVersion | Format-Table
-        $latestVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $latestVersion.Major, $latestVersion.Minor, $latestVersion.Patch
-    }
-    Write-Output '::endgroup::'
-
-    Write-Output '-------------------------------------------------'
-    Write-Output "Latest version:                 [$latestVersion]"
-    Write-Output '-------------------------------------------------'
-
     Write-Output '::group::Calculate new version'
     $version = $latestVersion | ConvertTo-SemVer
     $major = $version.Major
@@ -247,11 +247,10 @@ if ($createPrerelease -or $createRelease) {
         }
         Write-Output '::endgroup::'
     }
+    Write-Output "::notice::Release created: [$newVersion]"
 } else {
     Write-Output 'Skipping release creation.'
 }
-
-Write-Output "::notice::Release created: [$newVersion]"
 
 Write-Output '::group::List prereleases using the same name'
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
