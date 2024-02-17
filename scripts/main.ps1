@@ -251,6 +251,8 @@ if ($createPrerelease -or $createRelease) {
 }
 
 Write-Output "::notice::Release created: [$newVersion]"
+Write-Output "::warning::Release created: [$newVersion]"
+Write-Output "::error::Release created: [$newVersion]"
 
 Write-Output '::group::List prereleases using the same name'
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
