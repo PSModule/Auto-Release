@@ -179,7 +179,9 @@ if ($createPrerelease -or $createRelease) {
         }
 
         if ($incrementalPrerelease) {
-            $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" } | Sort-Object -Descending -Property publishedAt
+            $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" } | ForEach-Object {
+                $_ | Add-Member -MemberType NoteProperty -Name 'number' -Value ($_.tagName -Split '.')[-1] -PassThru
+            } | Sort-Object -Property number -Descending
             Write-Output "Prereleases:                    [$($prereleases.count)]"
             if ($prereleases.count -gt 0) {
                 $latestPrereleaseVersion = ($prereleases[0].tagName | ConvertTo-SemVer) | Select-Object -ExpandProperty Prerelease
