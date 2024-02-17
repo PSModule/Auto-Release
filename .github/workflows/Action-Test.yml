@@ -1,7 +1,5 @@
 name: Action-Test
 
-run-name: "Action-Test - [${{ github.event.pull_request.title }} #${{ github.event.pull_request.number }}] by @${{ github.actor }}"
-
 on:
   push:
     branches:
