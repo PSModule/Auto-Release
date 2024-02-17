@@ -252,7 +252,7 @@ if ($createPrerelease -or $createRelease) {
 
 Write-Output '::group::List prereleases using the same name'
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
-$prereleasesToCleanup | Format-List
+$prereleasesToCleanup | Select-Object -Property name, publishedAt,isDraft,isPrerelease,isLatest | Format-Table
 Write-Output '::endgroup::'
 
 if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
