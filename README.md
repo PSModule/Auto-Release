@@ -23,7 +23,6 @@ The following labels will inform the action what kind of release to create:
   - `minor`
   - `feature`
   - `improvement`
-  - `enhancement`
 - For a patch release, and increases the third number in the version.
   - `patch`
   - `bug`
@@ -31,12 +30,13 @@ The following labels will inform the action what kind of release to create:
 
 When a pull request is closed, the action will create a release based on the labels and clean up any previous prereleases that was created.
 
+> Note: The labels can be configured using the `MajorLabels`, `MinorLabels` and `PatchLabels` parameters/settings in the configuration file to trigger on other labels.
 
 ## Usage
 
-The action have the following parameters:
+The action can be configured using the following settings:
 
-| Parameter | Description | Default | Required |
+| Name | Description | Default | Required |
 | --- | --- | --- | --- |
 | `AutoCleanup`| Control wether to automatically cleanup prereleases. If disabled, the action will not remove any prereleases. | `true` | false |
 | `AutoPatching` | Control wether to automatically handle patches. If disabled, the action will only create a patch release if the pull request has a 'patch' label. | `true` | false |
@@ -49,12 +49,13 @@ The action have the following parameters:
 | `MinorLabels` | The labels to use for minor releases. | `minor, feature, improvement` | false |
 | `PatchLabels` | The labels to use for patch releases. | `patch, fix, bug` | false |
 | `VersionPrefix` | The prefix to use for the version number. | `v` | false |
+| `WhatIf` | Control wether to simulate the action. If enabled, the action will not create any releases. Used for testing. | `false` | false |
 
 ### Configuration file
 
 The configuration file is a YAML file that can be used to configure the action.
-The file can be placed in the `.github` directory of the repository and named `auto-release.yml`.
-The file can be used to configure the action using the same parameters as the action inputs.
+By default, the configuration file is expected at `.github\auto-release.yml`, which can be changed using the `ConfigurationFile` setting.
+The actions configuration can be change by altering the settings in the configuration file.
 
 ```yaml
 DatePrereleaseFormat: 'yyyyMMddHHmm'
@@ -65,6 +66,7 @@ VersionPrefix: ''
 This example uses the date format for the prerelease, disables the incremental prerelease and removes the version prefix.
 
 ## Example
+
 Add a workflow in you repository using the following example:
 
 ```yaml

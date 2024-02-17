@@ -43,6 +43,7 @@ $createMinorTag = ($configuration.CreateMinorTag | IsNotNullOrEmpty) ? $configur
 $datePrereleaseFormat = ($configuration.DatePrereleaseFormat | IsNotNullOrEmpty) ? $configuration.DatePrereleaseFormat : $env:DatePrereleaseFormat
 $incrementalPrerelease = ($configuration.IncrementalPrerelease | IsNotNullOrEmpty) ? $configuration.IncrementalPrerelease -eq 'true' : $env:IncrementalPrerelease -eq 'true'
 $versionPrefix = ($configuration.VersionPrefix | IsNotNullOrEmpty) ? $configuration.VersionPrefix : $env:VersionPrefix
+$whatIf = ($configuration.WhatIf | IsNotNullOrEmpty) ? $configuration.WhatIf -eq 'true' : $env:WhatIf -eq 'true'
 
 $majorLabels = (($configuration.MajorLabels | IsNotNullOrEmpty) ? $configuration.MajorLabels : $env:MajorLabels) -split ',' | ForEach-Object { $_.Trim() }
 $minorLabels = (($configuration.MinorLabels | IsNotNullOrEmpty) ? $configuration.MinorLabels : $env:MinorLabels) -split ',' | ForEach-Object { $_.Trim() }
@@ -56,6 +57,7 @@ Write-Output "Create minor tag enabled:       [$createMinorTag]"
 Write-Output "Date-based prerelease format:   [$datePrereleaseFormat]"
 Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
 Write-Output "Version prefix:                 [$versionPrefix]"
+Write-Output "What if mode:                   [$whatIf]"
 Write-Output ''
 Write-Output "Major labels:                   [$($majorLabels -join ', ')]"
 Write-Output "Minor labels:                   [$($minorLabels -join ', ')]"
@@ -207,47 +209,71 @@ if ($createPrerelease -or $createRelease) {
         $releaseExists = $releases.tagName -Contains $newVersion
         if ($releaseExists -and -not $incrementalPrerelease) {
             Write-Output 'Release already exists, recreating.'
-            gh release delete $newVersion --cleanup-tag --yes
+            if ($whatIf) {
+                Write-Output "WhatIf: gh release delete $newVersion --cleanup-tag --yes"
+            } else {
+                gh release delete $newVersion --cleanup-tag --yes
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Failed to delete the release [$newVersion]."
+                    exit $LASTEXITCODE
+                }
+            }
+        }
+
+        if ($whatIf) {
+            Write-Output "WhatIf: gh release create $newVersion --title $newVersion --target $($pull_request.head.ref) --generate-notes --prerelease"
+        } else {
+            gh release create $newVersion --title $newVersion --target $pull_request.head.ref --generate-notes --prerelease
             if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to delete the release [$newVersion]."
+                Write-Error "Failed to create the release [$newVersion]."
+                exit $LASTEXITCODE
+            }
+        }
+    } else {
+        if ($whatIf) {
+            Write-Output "WhatIf: gh release create $newVersion --title $newVersion --generate-notes"
+        } else {
+            gh release create $newVersion --title $newVersion --generate-notes
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to create the release [$newVersion]."
                 exit $LASTEXITCODE
             }
         }
 
-        gh release create $newVersion --title $newVersion --target $pull_request.head.ref --generate-notes --prerelease
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to create the release [$newVersion]."
-            exit $LASTEXITCODE
-        }
-    } else {
-        gh release create $newVersion --title $newVersion --generate-notes
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to create the release [$newVersion]."
-            exit $LASTEXITCODE
-        }
-
         if ($createMajorTag) {
             $majorTag = ('{0}{1}' -f $versionPrefix, $major)
-            git tag -f $majorTag 'main'
-            if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to create major tag [$majorTag]."
-                exit $LASTEXITCODE
+            if ($whatIf) {
+                Write-Output "WhatIf: git tag -f $majorTag 'main'"
+            } else {
+                git tag -f $majorTag 'main'
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Failed to create major tag [$majorTag]."
+                    exit $LASTEXITCODE
+                }
             }
         }
 
         if ($createMinorTag) {
             $minorTag = ('{0}{1}.{2}' -f $versionPrefix, $major, $minor)
-            git tag -f $minorTag 'main'
-            if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to create minor tag [$minorTag]."
-                exit $LASTEXITCODE
+            if ($whatIf) {
+                Write-Output "WhatIf: git tag -f $minorTag 'main'"
+            } else {
+                git tag -f $minorTag 'main'
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Failed to create minor tag [$minorTag]."
+                    exit $LASTEXITCODE
+                }
             }
         }
 
-        git push origin --tags --force
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error 'Failed to push tags.'
-            exit $LASTEXITCODE
+        if ($whatIf) {
+            Write-Output 'WhatIf: git push origin --tags --force'
+        } else {
+            git push origin --tags --force
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error 'Failed to push tags.'
+                exit $LASTEXITCODE
+            }
         }
         Write-Output '::endgroup::'
     }
@@ -266,10 +292,14 @@ if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
     foreach ($rel in $prereleasesToCleanup) {
         $relTagName = $rel.tagName
         Write-Output "Deleting prerelease:            [$relTagName]."
-        gh release delete $rel.tagName --cleanup-tag --yes
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to delete release [$relTagName]."
-            exit $LASTEXITCODE
+        if ($whatIf) {
+            Write-Output "WhatIf: gh release delete $($rel.tagName) --cleanup-tag --yes"
+        } else {
+            gh release delete $rel.tagName --cleanup-tag --yes
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to delete release [$relTagName]."
+                exit $LASTEXITCODE
+            }
         }
     }
     Write-Output '::endgroup::'

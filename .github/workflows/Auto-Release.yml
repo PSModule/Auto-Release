@@ -27,3 +27,5 @@ jobs:
         uses: ./
         env:
           GH_TOKEN: ${{ github.token }} # Used for GitHub CLI authentication
+        with:
+          IncrementalPrerelease: false

@@ -50,6 +50,10 @@ inputs:
     description: The prefix to use for the version number.
     required: false
     default: 'v'
+  WhatIf:
+    description: If specified, the action will only log the changes it would make, but will not actually create or delete any releases or tags.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -68,4 +72,5 @@ runs:
         MinorLabels: ${{ inputs.MinorLabels }}
         PatchLabels: ${{ inputs.PatchLabels }}
         VersionPrefix: ${{ inputs.VersionPrefix }}
+        WhatIf: ${{ inputs.WhatIf }}
       run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"
