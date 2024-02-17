@@ -182,6 +182,7 @@ if ($createPrerelease -or $createRelease) {
             $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" } | ForEach-Object {
                 $_ | Add-Member -MemberType NoteProperty -Name 'number' -Value ($_.tagName -Split '.')[-1] -PassThru
             } | Sort-Object -Property number -Descending
+            $prereleases | Format-Table
             Write-Output "Prereleases:                    [$($prereleases.count)]"
             if ($prereleases.count -gt 0) {
                 $latestPrereleaseVersion = ($prereleases[0].tagName | ConvertTo-SemVer) | Select-Object -ExpandProperty Prerelease
