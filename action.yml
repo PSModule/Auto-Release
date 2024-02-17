@@ -56,4 +56,16 @@ runs:
   steps:
     - name: Auto-Release
       shell: pwsh
+      env:
+        AutoCleanup: ${{ inputs.AutoCleanup }}
+        AutoPatching: ${{ inputs.AutoPatching }}
+        ConfigurationFile: ${{ inputs.ConfigurationFile }}
+        CreateMajorTag: ${{ inputs.CreateMajorTag }}
+        CreateMinorTag: ${{ inputs.CreateMinorTag }}
+        DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
+        IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
+        MajorLabels: ${{ inputs.MajorLabels }}
+        MinorLabels: ${{ inputs.MinorLabels }}
+        PatchLabels: ${{ inputs.PatchLabels }}
+        VersionPrefix: ${{ inputs.VersionPrefix }}
       run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"
