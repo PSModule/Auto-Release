@@ -30,8 +30,7 @@ Write-Output '::endgroup::'
 
 Write-Output "::group::Set configuration"
 if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
-    Write-Error "Configuration file not found at [$env:ConfigurationFile]"
-    exit 1
+    Write-Output "Configuration file not found at [$env:ConfigurationFile]"
 } else {
     Write-Output "Reading from configuration file [$env:ConfigurationFile]"
     $configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationFile -Raw)
