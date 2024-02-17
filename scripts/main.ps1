@@ -88,23 +88,23 @@ $pull_request | Format-List
 Write-Output '::endgroup::'
 
 Write-Output '::group::Pull request - Labels'
-$labels = @('')
+$labels = @()
 $labels += $pull_request.labels.name
 $labels | Format-List
 Write-Output '::endgroup::'
 
-$majorTags = @('major', 'breaking')
-$minorTags = @('minor', 'feature', 'improvement')
-$patchTags = @('patch', 'fix', 'bug')
+$majorLabels = @('major', 'breaking')
+$minorLabels = @('minor', 'feature', 'improvement')
+$patchLabels = @('patch', 'fix', 'bug')
 
 $createRelease = $pull_request.base.ref -eq 'main' -and ($pull_request.merged).ToString() -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and ($pull_request.merged).ToString() -eq 'False'
 $preRelease = $labels -Contains 'prerelease'
 $createPrerelease = $preRelease -and -not $createRelease -and -not $closedPullRequest
 
-$majorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $majorTags -IncludeEqual -ExcludeDifferent).Count -gt 0
-$minorRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $minorTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease
-$patchRelease = (Compare-Object -ReferenceObject $labels -DifferenceObject $patchTags -IncludeEqual -ExcludeDifferent).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
+$majorRelease = ($labels | Where-Object { $majorLabels -contains $_ }).Count -gt 0
+$minorRelease = ($labels | Where-Object { $minorLabels -contains $_ }).Count -gt 0 -and -not $majorRelease
+$patchRelease = ($labels | Where-Object { $patchLabels -contains $_ }).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
 
 Write-Output '-------------------------------------------------'
 Write-Output "Create a release:               [$createRelease]"

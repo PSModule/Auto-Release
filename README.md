@@ -10,6 +10,28 @@ Auto-Release follows:
 - [GitHub Flow specifications](https://docs.github.com/en/get-started/using-github/github-flow)
 - [Continiuous Delivery practices](https://en.wikipedia.org/wiki/Continuous_delivery)
 
+
+## How it works
+
+The workflow will trigger on pull requests to the main branch.
+
+The following labels will inform the action what kind of release to create:
+- For a major release, and increasing the first number in the version use:
+  - `major`
+  - `breaking`
+- For a minor release, and increasing the second number in the version.
+  - `minor`
+  - `feature`
+  - `improvement`
+  - `enhancement`
+- For a patch release, and increases the third number in the version.
+  - `patch`
+  - `bug`
+  - `fix`
+
+When a pull request is closed, the action will create a release based on the labels and clean up any previous prereleases that was created.
+
+
 ## Usage
 
 The action have the following parameters:
@@ -25,7 +47,21 @@ The action have the following parameters:
 | `IncrementalPrerelease` | Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch. | `true` | false |
 | `VersionPrefix` | The prefix to use for the version number. | `v` | false |
 
-### Example
+### Configuration file
+
+The configuration file is a YAML file that can be used to configure the action.
+The file can be placed in the `.github` directory of the repository and named `auto-release.yml`.
+The file can be used to configure the action using the same parameters as the action inputs.
+
+```yaml
+DatePrereleaseFormat: 'yyyyMMddHHmm'
+IncrementalPrerelease: false
+VersionPrefix: ''
+```
+
+This example uses the date format for the prerelease, disables the incremental prerelease and removes the version prefix.
+
+## Example
 Add a workflow in you repository using the following example:
 
 ```yaml
@@ -57,23 +93,3 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }} # Used for GitHub CLI authentication
 ```
-
-## How it works
-
-The workflow will trigger on pull requests to the main branch.
-
-The following labels will inform the action what kind of release to create:
-- For a major release, and increasing the first number in the version use:
-  - `major`
-  - `breaking`
-- For a minor release, and increasing the second number in the version.
-  - `minor`
-  - `feature`
-  - `improvement`
-  - `enhancement`
-- For a patch release, and increases the third number in the version.
-  - `patch`
-  - `bug`
-  - `fix`
-
-When a pull request is closed, the action will create a release based on the labels and clean up any previous prereleases that was created.
