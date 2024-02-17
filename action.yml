@@ -38,6 +38,18 @@ inputs:
     description: The prefix to use for the version number.
     required: false
     default: 'v'
+  MajorLabels:
+    description: The labels to use for major releases.
+    required: false
+    default: 'major, breaking'
+  MinorLabels:
+    description: The labels to use for minor releases.
+    required: false
+    default: 'minor, feature, improvement'
+  PatchLabels:
+    description: The labels to use for patch releases.
+    required: false
+    default: 'patch, fix, bug'
 
 runs:
   using: composite

@@ -44,6 +44,10 @@ $datePrereleaseFormat = ($configuration.DatePrereleaseFormat | IsNotNullOrEmpty)
 $incrementalPrerelease = ($configuration.IncrementalPrerelease | IsNotNullOrEmpty) ? $configuration.IncrementalPrerelease -eq 'true' : $env:IncrementalPrerelease -eq 'true'
 $versionPrefix = ($configuration.VersionPrefix | IsNotNullOrEmpty) ? $configuration.VersionPrefix : $env:VersionPrefix
 
+$majorLabels = (($configuration.MajorLabels | IsNotNullOrEmpty) ? $configuration.MajorLabels : $env:MajorLabels) -split ','
+$minorLabels = (($configuration.MinorLabels | IsNotNullOrEmpty) ? $configuration.MinorLabels : $env:MinorLabels) -split ','
+$patchLabels = (($configuration.PatchLabels | IsNotNullOrEmpty) ? $configuration.PatchLabels : $env:PatchLabels) -split ','
+
 Write-Output '-------------------------------------------------'
 Write-Output "Auto cleanup enabled:           [$autoCleanup]"
 Write-Output "Auto patching enabled:          [$autoPatching]"
@@ -52,6 +56,10 @@ Write-Output "Create minor tag enabled:       [$createMinorTag]"
 Write-Output "Date-based prerelease format:   [$datePrereleaseFormat]"
 Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
 Write-Output "Version prefix:                 [$versionPrefix]"
+Write-Output ''
+Write-Output "Major labels:                   [$($majorLabels -join ', ')]"
+Write-Output "Minor labels:                   [$($minorLabels -join ', ')]"
+Write-Output "Patch labels:                   [$($patchLabels -join ', ')]"
 Write-Output '-------------------------------------------------'
 Write-Output '::endgroup::'
 
@@ -92,10 +100,6 @@ $labels = @()
 $labels += $pull_request.labels.name
 $labels | Format-List
 Write-Output '::endgroup::'
-
-$majorLabels = @('major', 'breaking')
-$minorLabels = @('minor', 'feature', 'improvement')
-$patchLabels = @('patch', 'fix', 'bug')
 
 $createRelease = $pull_request.base.ref -eq 'main' -and ($pull_request.merged).ToString() -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and ($pull_request.merged).ToString() -eq 'False'
