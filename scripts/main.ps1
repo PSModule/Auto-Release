@@ -122,7 +122,7 @@ if ($createPrerelease -or $createRelease) {
         Write-Error 'Failed to list all releases for the repo.'
         exit $LASTEXITCODE
     }
-    $releases | Select-Object -Property name, isDraft, isPrerelease, isLatest, publishedAt, createdAt | Format-Table
+    $releases | Select-Object -Property name, isPrerelease, isLatest, publishedAt | Format-Table
     Write-Output '::endgroup::'
 
     Write-Output '::group::Get latest version'
@@ -180,7 +180,7 @@ if ($createPrerelease -or $createRelease) {
 
         if ($incrementalPrerelease) {
             $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" } | ForEach-Object {
-                $_ | Add-Member -MemberType NoteProperty -Name 'number' -Value ($_.tagName -Split '.')[-1] -PassThru
+                $_ | Add-Member -MemberType NoteProperty -Name 'number' -Value ($_.tagName -Split '\.')[-1] -PassThru -Force
             } | Sort-Object -Property number -Descending
             $prereleases | Select-Object -Property number, name, publishedAt, isPrerelease, isLatest | Format-Table
 
