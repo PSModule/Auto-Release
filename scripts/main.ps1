@@ -93,6 +93,7 @@ $labels += $pull_request.labels.name
 $labels | Format-List
 Write-Output '::endgroup::'
 
+
 $majorTags = @('major', 'breaking')
 $minorTags = @('minor', 'feature', 'improvement')
 $patchTags = @('patch', 'fix', 'bug')
