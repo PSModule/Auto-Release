@@ -229,6 +229,16 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 exit $LASTEXITCODE
             }
         }
+
+        if ($whatIf) {
+            Write-Output 'WhatIf: gh pr comment $pull_request.number -b "The release [$newVersion] has been created."'
+        } else {
+            gh pr comment $pull_request.number -b "The release [$newVersion] has been created."
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to comment on the pull request."
+                exit $LASTEXITCODE
+            }
+        }
     } else {
         if ($whatIf) {
             Write-Output "WhatIf: gh release create $newVersion --title $newVersion --generate-notes"
