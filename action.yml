@@ -6,10 +6,38 @@ branding:
   color: blue
 
 inputs:
+  AutoCleanup:
+    description: Control wether to automatically delete the prerelease tags after the stable release is created.
+    required: false
+    default: 'true'
+  AutoPatching:
+    description: Control wether to automatically handle patches. If disabled, the action will only create a patch release if the pull request has a 'patch' label.
+    required: false
+    default: 'true'
   ConfigurationFile:
     description: The path to the configuration file.
     required: false
-    default: '.github\auto-release.yml'
+    default: .github\auto-release.yml
+  CreateMajorTag:
+    description: Control wether to create a major tag when a pull request is merged into the main branch.
+    required: false
+    default: 'true'
+  CreateMinorTag:
+    description: Control wether to create a minor tag when a pull request is merged into the main branch.
+    required: false
+    default: 'true'
+  DatePrereleaseFormat:
+    description: If specified, uses a date based prerelease scheme. The format should be a valid .NET format string like 'yyyyMMddHHmm'.
+    required: false
+    default: ''
+  IncrementalPrerelease:
+    description: Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch.
+    required: false
+    default: 'true'
+  VersionPrefix:
+    description: The prefix to use for the version number.
+    required: false
+    default: 'v'
 
 runs:
   using: composite
@@ -17,5 +45,12 @@ runs:
     - name: Auto-Release
       shell: pwsh
       env:
+        AutoCleanup: ${{ inputs.AutoCleanup }}
+        AutoPatching: ${{ inputs.AutoPatching }}
         ConfigurationFile: ${{ inputs.ConfigurationFile }}
+        CreateMajorTag: ${{ inputs.CreateMajorTag }}
+        CreateMinorTag: ${{ inputs.CreateMinorTag }}
+        DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
+        IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
+        VersionPrefix: ${{ inputs.VersionPrefix }}
       run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"

@@ -24,6 +24,10 @@ Get-Alias | Where-Object Source -EQ 'powershell-yaml' | Format-Table
 Write-Output '-------------------------------------------------'
 Write-Output '::endgroup::'
 
+Write-Output '::group::Environment variables'
+Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
+Write-Output '::endgroup::'
+
 Write-Output "::group::Read configuration [$env:ConfigurationFile]"
 if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
     Write-Error "Configuration file not found at [$env:ConfigurationFile]"
@@ -31,13 +35,13 @@ if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
 }
 $configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationFile -Raw)
 
-$autoCleanup = ($configuration.AutoCleanup | IsNotNullOrEmpty) ? $configuration.AutoCleanup -eq 'true' : $true
-$autoPatching = ($configuration.AutoPatching | IsNotNullOrEmpty) ? $configuration.AutoPatching -eq 'true' : $true
-$createMajorTag = ($configuration.CreateMajorTag | IsNotNullOrEmpty) ? $configuration.CreateMajorTag -eq 'true' : $true
-$createMinorTag = ($configuration.CreateMinorTag | IsNotNullOrEmpty) ? $configuration.CreateMinorTag -eq 'true' : $true
-$datePrereleaseFormat = $configuration.DatePrereleaseFormat
-$incrementalPrerelease = ($configuration.IncrementalPrerelease | IsNotNullOrEmpty) ? $configuration.IncrementalPrerelease -eq 'true' : $true
-$versionPrefix = $configuration.VersionPrefix
+$autoCleanup = ($configuration.AutoCleanup | IsNotNullOrEmpty) ? $configuration.AutoCleanup -eq 'true' : $env:AutoCleanup -eq 'true'
+$autoPatching = ($configuration.AutoPatching | IsNotNullOrEmpty) ? $configuration.AutoPatching -eq 'true' : $env:AutoPatching -eq 'true'
+$createMajorTag = ($configuration.CreateMajorTag | IsNotNullOrEmpty) ? $configuration.CreateMajorTag -eq 'true' : $env:CreateMajorTag -eq 'true'
+$createMinorTag = ($configuration.CreateMinorTag | IsNotNullOrEmpty) ? $configuration.CreateMinorTag -eq 'true' : $env:CreateMinorTag -eq 'true'
+$datePrereleaseFormat = ($configuration.DatePrereleaseFormat | IsNotNullOrEmpty) ? $configuration.DatePrereleaseFormat : $env:DatePrereleaseFormat
+$incrementalPrerelease = ($configuration.IncrementalPrerelease | IsNotNullOrEmpty) ? $configuration.IncrementalPrerelease -eq 'true' : $env:IncrementalPrerelease -eq 'true'
+$versionPrefix = ($configuration.VersionPrefix | IsNotNullOrEmpty) ? $configuration.VersionPrefix : $env:VersionPrefix
 
 Write-Output '-------------------------------------------------'
 Write-Output "Auto cleanup enabled:           [$autoCleanup]"
