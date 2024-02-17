@@ -252,9 +252,13 @@ if ($createPrerelease -or $createRelease) {
     Write-Output 'Skipping release creation.'
 }
 
+Write-Output '::group::Lit prereleases using the same name'
+$prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
+$prereleasesToCleanup | Format-List
+Write-Output '::endgroup::'
+
 if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
     Write-Output "::group::Cleanup prereleases for [$preReleaseName]"
-    $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
     foreach ($rel in $prereleasesToCleanup) {
         $relTagName = $rel.tagName
         Write-Output "Deleting prerelease:            [$relTagName]."
