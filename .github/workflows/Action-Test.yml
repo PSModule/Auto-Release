@@ -16,9 +16,6 @@ on:
       - .github/workflows/Action-Test.yml
       - scripts/**
 
-permissions:
-  contents: read
-
 jobs:
   ActionTestDefault:
     name: Action-Test - [Default]
