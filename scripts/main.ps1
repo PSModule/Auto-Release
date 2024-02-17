@@ -182,7 +182,7 @@ if ($createPrerelease -or $createRelease) {
             $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" } | ForEach-Object {
                 $_ | Add-Member -MemberType NoteProperty -Name 'number' -Value ($_.tagName -Split '.')[-1] -PassThru
             } | Sort-Object -Property number -Descending
-            $prereleases | Format-Table
+            $prereleases | Select-Object -Property number, name, publishedAt, isPrerelease, isLatest | Format-Table
 
             if ($prereleases.count -gt 0) {
                 $latestPrereleaseVersion = ($prereleases[0].tagName | ConvertTo-SemVer) | Select-Object -ExpandProperty Prerelease
@@ -257,7 +257,7 @@ Write-Output "::notice::Release created: [$newVersion]"
 
 Write-Output '::group::List prereleases using the same name'
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
-$prereleasesToCleanup | Select-Object -Property name, publishedAt, isDraft, isPrerelease, isLatest | Format-Table
+$prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table
 Write-Output '::endgroup::'
 
 if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
