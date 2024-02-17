@@ -15,7 +15,7 @@ inputs:
     required: false
     default: 'true'
   ConfigurationFile:
-    description: The path to the configuration file.
+    description: The path to the configuration file. Settings in the configuration file take precedence over the action inputs.
     required: false
     default: .github\auto-release.yml
   CreateMajorTag:
@@ -33,7 +33,7 @@ inputs:
   IncrementalPrerelease:
     description: Control wether to automatically increment the prerelease number. If disabled, the action will ensure only one prerelease exists for a given branch.
     required: false
-    default: 'true'
+    default: 'false'
   VersionPrefix:
     description: The prefix to use for the version number.
     required: false

@@ -28,12 +28,14 @@ Write-Output '::group::Environment variables'
 Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
 Write-Output '::endgroup::'
 
-Write-Output "::group::Read configuration [$env:ConfigurationFile]"
+Write-Output "::group::Set configuration"
 if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
     Write-Error "Configuration file not found at [$env:ConfigurationFile]"
     exit 1
+} else {
+    Write-Output "Reading from configuration file [$env:ConfigurationFile]"
+    $configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationFile -Raw)
 }
-$configuration = ConvertFrom-Yaml -Yaml (Get-Content $env:ConfigurationFile -Raw)
 
 $autoCleanup = ($configuration.AutoCleanup | IsNotNullOrEmpty) ? $configuration.AutoCleanup -eq 'true' : $env:AutoCleanup -eq 'true'
 $autoPatching = ($configuration.AutoPatching | IsNotNullOrEmpty) ? $configuration.AutoPatching -eq 'true' : $env:AutoPatching -eq 'true'
