@@ -147,7 +147,7 @@ Write-Output '-------------------------------------------------'
 Write-Output "Latest version:                 [$latestVersion]"
 Write-Output '-------------------------------------------------'
 
-if ($createPrerelease -or $createRelease) {
+if ($createPrerelease -or $createRelease -or $whatIf) {
     Write-Output '::group::Calculate new version'
     $version = $latestVersion | ConvertTo-SemVer
     $major = $version.Major
@@ -287,7 +287,7 @@ $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleas
 $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table
 Write-Output '::endgroup::'
 
-if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
+if (($closedPullRequest -or $createRelease) -and $autoCleanup -and $whatIf) {
     Write-Output "::group::Cleanup prereleases for [$preReleaseName]"
     foreach ($rel in $prereleasesToCleanup) {
         $relTagName = $rel.tagName
