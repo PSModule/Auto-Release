@@ -10,7 +10,6 @@ Auto-Release follows:
 - [GitHub Flow specifications](https://docs.github.com/en/get-started/using-github/github-flow)
 - [Continiuous Delivery practices](https://en.wikipedia.org/wiki/Continuous_delivery)
 
-
 ## How it works
 
 The workflow will trigger on pull requests to the main branch.
