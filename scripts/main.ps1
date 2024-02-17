@@ -97,6 +97,7 @@ $majorLabels = @('major', 'breaking')
 $minorLabels = @('minor', 'feature', 'improvement')
 $patchLabels = @('patch', 'fix', 'bug')
 
+
 $createRelease = $pull_request.base.ref -eq 'main' -and ($pull_request.merged).ToString() -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and ($pull_request.merged).ToString() -eq 'False'
 $preRelease = $labels -Contains 'prerelease'
