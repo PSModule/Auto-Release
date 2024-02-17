@@ -259,7 +259,7 @@ if ($createPrerelease -or $createRelease) {
     Write-Output 'Skipping release creation.'
     Write-Output"::notice::Skipping release creation."
 }
-
+'### Hello world! :rocket:' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
 if (($closedPullRequest -or $createRelease) -and $autoCleanup) {
     Write-Output "::group::Cleanup prereleases for [$preReleaseName]"
     $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
