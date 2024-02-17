@@ -180,7 +180,7 @@ if ($createPrerelease -or $createRelease) {
 
         if ($incrementalPrerelease) {
             $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" } | ForEach-Object {
-                $_ | Add-Member -MemberType NoteProperty -Name 'number' -Value [int](($_.tagName -Split '\.')[-1]) -TypeName int -PassThru -Force
+                $_ | Add-Member -MemberType  -Name 'number' -Value [int](($_.tagName -Split '\.')[-1]) -TypeName int -PassThru -Force
             } | Sort-Object -Property number -Descending
             $prereleases | Select-Object -Property number, name, publishedAt, isPrerelease, isLatest | Format-Table
 
