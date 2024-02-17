@@ -28,7 +28,7 @@ Write-Output '::group::Environment variables'
 Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
 Write-Output '::endgroup::'
 
-Write-Output "::group::Set configuration"
+Write-Output '::group::Set configuration'
 if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
     Write-Output "Configuration file not found at [$env:ConfigurationFile]"
 } else {
@@ -214,40 +214,38 @@ if ($createPrerelease -or $createRelease) {
             Write-Error "Failed to create the release [$newVersion]."
             exit $LASTEXITCODE
         }
-        return
-    }
-
-    gh release create $newVersion --title $newVersion --generate-notes
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to create the release [$newVersion]."
-        exit $LASTEXITCODE
-    }
-
-    if ($createMajorTag) {
-        $majorTag = ('{0}{1}' -f $versionPrefix, $major)
-        git tag -f $majorTag 'main'
+    } else {
+        gh release create $newVersion --title $newVersion --generate-notes
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to create major tag [$majorTag]."
+            Write-Error "Failed to create the release [$newVersion]."
             exit $LASTEXITCODE
         }
-    }
 
-    if ($createMinorTag) {
-        $minorTag = ('{0}{1}.{2}' -f $versionPrefix, $major, $minor)
-        git tag -f $minorTag 'main'
+        if ($createMajorTag) {
+            $majorTag = ('{0}{1}' -f $versionPrefix, $major)
+            git tag -f $majorTag 'main'
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to create major tag [$majorTag]."
+                exit $LASTEXITCODE
+            }
+        }
+
+        if ($createMinorTag) {
+            $minorTag = ('{0}{1}.{2}' -f $versionPrefix, $major, $minor)
+            git tag -f $minorTag 'main'
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to create minor tag [$minorTag]."
+                exit $LASTEXITCODE
+            }
+        }
+
+        git push origin --tags --force
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to create minor tag [$minorTag]."
+            Write-Error 'Failed to push tags.'
             exit $LASTEXITCODE
         }
+        Write-Output '::endgroup::'
     }
-
-    git push origin --tags --force
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error 'Failed to push tags.'
-        exit $LASTEXITCODE
-    }
-    Write-Output '::endgroup::'
-
 } else {
     Write-Output 'Skipping release creation.'
 }
