@@ -1,0 +1,32 @@
+name: Action-Test
+
+run-name: "Action-Test - [${{ github.event.pull_request.title }} #${{ github.event.pull_request.number }}] by @${{ github.actor }}"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - action.yml
+      - .github/workflows/Action-Test.yml
+      - scripts/**
+  pull_request:
+    branches-ignore:
+      - main
+    paths:
+      - action.yml
+      - .github/workflows/Action-Test.yml
+      - scripts/**
+
+jobs:
+  ActionTestDefault:
+    name: Action-Test - [Default]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Action-Test
+        uses: ./
+        with:
+          WhatIf: true

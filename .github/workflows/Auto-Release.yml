@@ -16,6 +16,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}
 
+permissions:
+  contents: write
+
 jobs:
   Auto-Release:
     runs-on: ubuntu-latest
