@@ -297,7 +297,7 @@ $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleas
 $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table
 Write-Output '::endgroup::'
 
-if (($closedPullRequest -or $createRelease) -and $autoCleanup -and $whatIf) {
+if (($closedPullRequest -or $createRelease) -and $autoCleanup -or $whatIf) {
     Write-Output "::group::Cleanup prereleases for [$preReleaseName]"
     foreach ($rel in $prereleasesToCleanup) {
         $relTagName = $rel.tagName
