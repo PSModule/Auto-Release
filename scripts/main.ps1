@@ -44,6 +44,7 @@ $incrementalPrerelease = ($configuration.IncrementalPrerelease | IsNotNullOrEmpt
 $versionPrefix = ($configuration.VersionPrefix | IsNotNullOrEmpty) ? $configuration.VersionPrefix : $env:VersionPrefix
 $whatIf = ($configuration.WhatIf | IsNotNullOrEmpty) ? $configuration.WhatIf -eq 'true' : $env:WhatIf -eq 'true'
 
+$ignoreLabels = (($configuration.IgnoreLabels | IsNotNullOrEmpty) ? $configuration.IgnoreLabels : $env:IgnoreLabels) -split ',' | ForEach-Object { $_.Trim() }
 $majorLabels = (($configuration.MajorLabels | IsNotNullOrEmpty) ? $configuration.MajorLabels : $env:MajorLabels) -split ',' | ForEach-Object { $_.Trim() }
 $minorLabels = (($configuration.MinorLabels | IsNotNullOrEmpty) ? $configuration.MinorLabels : $env:MinorLabels) -split ',' | ForEach-Object { $_.Trim() }
 $patchLabels = (($configuration.PatchLabels | IsNotNullOrEmpty) ? $configuration.PatchLabels : $env:PatchLabels) -split ',' | ForEach-Object { $_.Trim() }
@@ -58,6 +59,7 @@ Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
 Write-Output "Version prefix:                 [$versionPrefix]"
 Write-Output "What if mode:                   [$whatIf]"
 Write-Output ''
+Write-Output "Ignore labels:                  [$($ignoreLabels -join ', ')]"
 Write-Output "Major labels:                   [$($majorLabels -join ', ')]"
 Write-Output "Minor labels:                   [$($minorLabels -join ', ')]"
 Write-Output "Patch labels:                   [$($patchLabels -join ', ')]"
@@ -106,9 +108,15 @@ $closedPullRequest = $pull_request.state -eq 'closed' -and ($pull_request.merged
 $preRelease = $labels -Contains 'prerelease'
 $createPrerelease = $preRelease -and -not $createRelease -and -not $closedPullRequest
 
+$ignoreRelease = ($labels | Where-Object { $ignoreLabels -contains $_ }).Count -gt 0
 $majorRelease = ($labels | Where-Object { $majorLabels -contains $_ }).Count -gt 0
 $minorRelease = ($labels | Where-Object { $minorLabels -contains $_ }).Count -gt 0 -and -not $majorRelease
 $patchRelease = ($labels | Where-Object { $patchLabels -contains $_ }).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
+
+if($ignoreRelease) {
+    Write-Output 'Ignoring release creation.'
+    return
+}
 
 Write-Output '-------------------------------------------------'
 Write-Output "Create a release:               [$createRelease]"
