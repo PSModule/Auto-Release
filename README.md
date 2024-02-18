@@ -98,3 +98,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }} # Used for GitHub CLI authentication
 ```
+
+## Permissions
+
+If running the action in a restrictive mode, the following permissions needs to be granted to the action:
+
+```yaml
+permissions:
+  contents: write # Required to create releases
+  pull-requests: write # Required to create comments on the PRs
+```
