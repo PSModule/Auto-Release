@@ -1,28 +1,27 @@
-Write-Output '::group::Install - Utilities'
-Install-PSResource -Name Utilities -TrustRepository
-Write-Output '-------------------------------------------------'
-Get-PSResource -Name Utilities | Format-Table
-Write-Output '-------------------------------------------------'
-Write-Output 'Get commands'
-Get-Command -Module Utilities | Format-Table
-Write-Output '-------------------------------------------------'
-Write-Output 'Get aliases'
-Get-Alias | Where-Object Source -EQ 'Utilities' | Format-Table
-Write-Output '-------------------------------------------------'
-Write-Output '::endgroup::'
+function Install-Dependency {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [string] $Name
+    )
 
-Write-Output '::group::Install - powershell-yaml'
-Install-PSResource -Name powershell-yaml -TrustRepository
-Write-Output '-------------------------------------------------'
-Get-PSResource -Name powershell-yaml | Format-Table
-Write-Output '-------------------------------------------------'
-Write-Output 'Get commands'
-Get-Command -Module powershell-yaml | Format-Table
-Write-Output '-------------------------------------------------'
-Write-Output 'Get aliases'
-Get-Alias | Where-Object Source -EQ 'powershell-yaml' | Format-Table
-Write-Output '-------------------------------------------------'
-Write-Output '::endgroup::'
+    foreach ($item in $Name) {
+        Write-Output "::group::Install - $item"
+        Install-PSResource -Name $item -TrustRepository
+        Write-Output '-------------------------------------------------'
+        Get-PSResource -Name $item | Format-Table
+        Write-Output '-------------------------------------------------'
+        Write-Output 'Get commands'
+        Get-Command -Module $item | Format-Table
+        Write-Output '-------------------------------------------------'
+        Write-Output 'Get aliases'
+        Get-Alias | Where-Object Source -EQ $item | Format-Table
+        Write-Output '-------------------------------------------------'
+        Write-Output '::endgroup::'
+    }
+}
+
+Install-Dependency -Name 'Utilities', 'powershell-yaml'
 
 Write-Output '::group::Environment variables'
 Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
@@ -64,7 +63,6 @@ Write-Output "Minor labels:                   [$($minorLabels -join ', ')]"
 Write-Output "Patch labels:                   [$($patchLabels -join ', ')]"
 Write-Output '-------------------------------------------------'
 Write-Output '::endgroup::'
-
 
 Write-Output '::group::Event information - JSON'
 $githubEventJson = Get-Content $env:GITHUB_EVENT_PATH
@@ -235,7 +233,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         } else {
             gh pr comment $pull_request.number -b "The release [$newVersion] has been created."
             if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to comment on the pull request."
+                Write-Error 'Failed to comment on the pull request.'
                 exit $LASTEXITCODE
             }
         }
