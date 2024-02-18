@@ -9,8 +9,6 @@ on:
       - .github/workflows/Action-Test.yml
       - scripts/**
   pull_request:
-    branches-ignore:
-      - main
     paths:
       - action.yml
       - .github/workflows/Action-Test.yml
