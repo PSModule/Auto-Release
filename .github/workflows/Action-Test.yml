@@ -8,7 +8,9 @@ on:
       - action.yml
       - .github/workflows/Action-Test.yml
       - scripts/**
-  pull_request:
+  pull_request_target:
+    branches:
+      - main
     paths:
       - action.yml
       - .github/workflows/Action-Test.yml
