@@ -4,7 +4,6 @@ function Install-Dependency {
         [Parameter(Mandatory)]
         [string[]] $Name
     )
-    
 
     foreach ($item in $Name) {
         Write-Output "::group::Install - $item"
