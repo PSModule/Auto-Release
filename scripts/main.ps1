@@ -2,7 +2,7 @@ function Install-Dependency {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [string] $Name
+        [string[]] $Name
     )
 
     foreach ($item in $Name) {
