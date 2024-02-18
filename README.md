@@ -96,7 +96,7 @@ jobs:
       - name: Auto-Release
         uses: PSModule/Auto-Release@v1
         env:
-          GH_TOKEN: ${{ github.token }} # Used for GitHub CLI authentication
+          GITHUB_TOKEN: ${{ github.token }} # Used for GitHub CLI authentication
 ```
 
 ## Permissions
