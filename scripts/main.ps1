@@ -1,33 +1,13 @@
-function Install-Dependency {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [string[]] $Name
-    )
+#REQUIRES -Modules Utilities, powershell-yaml
 
-    foreach ($item in $Name) {
-        Write-Output "::group::Install - $item"
-        Install-PSResource -Name $item -TrustRepository
-        Write-Output '-------------------------------------------------'
-        Get-PSResource -Name $item | Format-Table
-        Write-Output '-------------------------------------------------'
-        Write-Output 'Get commands'
-        Get-Command -Module $item | Format-Table
-        Write-Output '-------------------------------------------------'
-        Write-Output 'Get aliases'
-        Get-Alias | Where-Object Source -EQ $item | Format-Table
-        Write-Output '-------------------------------------------------'
-        Write-Output '::endgroup::'
-    }
-}
+[CmdletBinding()]
+param()
 
-Install-Dependency -Name 'Utilities', 'powershell-yaml'
-
-Write-Output '::group::Environment variables'
+Start-LogGroup 'Environment variables'
 Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
-Write-Output '::endgroup::'
+Stop-LogGroup
 
-Write-Output '::group::Set configuration'
+Start-LogGroup 'Set configuration'
 if (-not (Test-Path -Path $env:ConfigurationFile -PathType Leaf)) {
     Write-Output "Configuration file not found at [$env:ConfigurationFile]"
 } else {
@@ -64,18 +44,18 @@ Write-Output "Major labels:                   [$($majorLabels -join ', ')]"
 Write-Output "Minor labels:                   [$($minorLabels -join ', ')]"
 Write-Output "Patch labels:                   [$($patchLabels -join ', ')]"
 Write-Output '-------------------------------------------------'
-Write-Output '::endgroup::'
+Stop-LogGroup
 
-Write-Output '::group::Event information - JSON'
+Start-LogGroup 'Event information - JSON'
 $githubEventJson = Get-Content $env:GITHUB_EVENT_PATH
 $githubEventJson | Format-List
-Write-Output '::endgroup::'
+Stop-LogGroup
 
-Write-Output '::group::Event information - Object'
+Start-LogGroup 'Event information - Object'
 $githubEvent = $githubEventJson | ConvertFrom-Json
 $pull_request = $githubEvent.pull_request
 $githubEvent | Format-List
-Write-Output '::endgroup::'
+Stop-LogGroup
 
 $isPullRequest = $githubEvent.PSObject.Properties.Name -Contains 'pull_request'
 if (-not ($isPullRequest -or $whatIf)) {
@@ -93,15 +73,15 @@ Write-Output "PR Head Ref:                    [$($pull_request.head.ref)]"
 Write-Output '-------------------------------------------------'
 $preReleaseName = $pull_request.head.ref -replace '[^a-zA-Z0-9]', ''
 
-Write-Output '::group::Pull request - details'
+Start-LogGroup 'Pull request - details'
 $pull_request | Format-List
-Write-Output '::endgroup::'
+Stop-LogGroup
 
-Write-Output '::group::Pull request - Labels'
+Start-LogGroup 'Pull request - Labels'
 $labels = @()
 $labels += $pull_request.labels.name
 $labels | Format-List
-Write-Output '::endgroup::'
+Stop-LogGroup
 
 $createRelease = $pull_request.base.ref -eq 'main' -and ($pull_request.merged).ToString() -eq 'True'
 $closedPullRequest = $pull_request.state -eq 'closed' -and ($pull_request.merged).ToString() -eq 'False'
@@ -113,7 +93,7 @@ $majorRelease = ($labels | Where-Object { $majorLabels -contains $_ }).Count -gt
 $minorRelease = ($labels | Where-Object { $minorLabels -contains $_ }).Count -gt 0 -and -not $majorRelease
 $patchRelease = ($labels | Where-Object { $patchLabels -contains $_ }).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
 
-if($ignoreRelease) {
+if ($ignoreRelease) {
     Write-Output 'Ignoring release creation.'
     return
 }
@@ -127,16 +107,16 @@ Write-Output "Create a patch release:         [$patchRelease]"
 Write-Output "Closed pull request:            [$closedPullRequest]"
 Write-Output '-------------------------------------------------'
 
-Write-Output '::group::Get releases'
+Start-LogGroup 'Get releases'
 $releases = gh release list --json 'createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName' | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) {
     Write-Error 'Failed to list all releases for the repo.'
     exit $LASTEXITCODE
 }
 $releases | Select-Object -Property name, isPrerelease, isLatest, publishedAt | Format-Table
-Write-Output '::endgroup::'
+Stop-LogGroup
 
-Write-Output '::group::Get latest version'
+Start-LogGroup 'Get latest version'
 $latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
 $latestRelease | Format-List
 $latestVersionString = $latestRelease.tagName
@@ -147,14 +127,14 @@ if ($latestVersionString | IsNotNullOrEmpty) {
     $latestVersion | Format-Table
     $latestVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $latestVersion.Major, $latestVersion.Minor, $latestVersion.Patch
 }
-Write-Output '::endgroup::'
+Stop-LogGroup
 
 Write-Output '-------------------------------------------------'
 Write-Output "Latest version:                 [$latestVersion]"
 Write-Output '-------------------------------------------------'
 
 if ($createPrerelease -or $createRelease -or $whatIf) {
-    Write-Output '::group::Calculate new version'
+    Start-LogGroup 'Calculate new version'
     $version = $latestVersion | ConvertTo-SemVer
     $major = $version.Major
     $minor = $version.Minor
@@ -192,7 +172,9 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
 
         if ($incrementalPrerelease) {
             $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" }
-            $prereleases | Select-Object -Property @{n = 'number'; e = { [int](($_.tagName -Split '\.')[-1]) } }, name, publishedAt, isPrerelease, isLatest | Format-Table
+            $prereleases |
+                Select-Object -Property @{n = 'number'; e = { [int](($_.tagName -Split '\.')[-1]) } }, name, publishedAt, isPrerelease, isLatest |
+                Format-Table
 
             if ($prereleases.count -gt 0) {
                 $latestPrereleaseVersion = ($prereleases[0].tagName | ConvertTo-SemVer) | Select-Object -ExpandProperty Prerelease
@@ -205,7 +187,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             $newVersion = $newVersion + '.' + $newPrereleaseNumber
         }
     }
-    Write-Output '::endgroup::'
+    Stop-LogGroup
     Write-Output '-------------------------------------------------'
     Write-Output "New version:                    [$newVersion]"
     Write-Output '-------------------------------------------------'
@@ -291,17 +273,17 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 exit $LASTEXITCODE
             }
         }
-        Write-Output '::endgroup::'
+        Stop-LogGroup
     }
     Write-Output "::notice::Release created: [$newVersion]"
 } else {
     Write-Output 'Skipping release creation.'
 }
 
-Write-Output '::group::List prereleases using the same name'
+Start-LogGroup 'List prereleases using the same name'
 $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
 $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table
-Write-Output '::endgroup::'
+Stop-LogGroup
 
 if (($closedPullRequest -or $createRelease) -and $autoCleanup -or $whatIf) {
     Write-Output "::group::Cleanup prereleases for [$preReleaseName]"
@@ -318,5 +300,5 @@ if (($closedPullRequest -or $createRelease) -and $autoCleanup -or $whatIf) {
             }
         }
     }
-    Write-Output '::endgroup::'
+    Stop-LogGroup
 }
