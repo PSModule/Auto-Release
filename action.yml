@@ -65,19 +65,19 @@ runs:
     - name: Auto-Release
       shell: pwsh
       env:
-        GITHUB_ACTION_INPUT_AutoCleanup: ${{ inputs.AutoCleanup }}
-        GITHUB_ACTION_INPUT_AutoPatching: ${{ inputs.AutoPatching }}
-        GITHUB_ACTION_INPUT_ConfigurationFile: ${{ inputs.ConfigurationFile }}
-        GITHUB_ACTION_INPUT_CreateMajorTag: ${{ inputs.CreateMajorTag }}
-        GITHUB_ACTION_INPUT_CreateMinorTag: ${{ inputs.CreateMinorTag }}
-        GITHUB_ACTION_INPUT_DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
-        GITHUB_ACTION_INPUT_IgnoreLabels: ${{ inputs.IgnoreLabels }}
-        GITHUB_ACTION_INPUT_IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
-        GITHUB_ACTION_INPUT_MajorLabels: ${{ inputs.MajorLabels }}
-        GITHUB_ACTION_INPUT_MinorLabels: ${{ inputs.MinorLabels }}
-        GITHUB_ACTION_INPUT_PatchLabels: ${{ inputs.PatchLabels }}
-        GITHUB_ACTION_INPUT_VersionPrefix: ${{ inputs.VersionPrefix }}
-        GITHUB_ACTION_INPUT_WhatIf: ${{ inputs.WhatIf }}
+        AutoCleanup: ${{ inputs.AutoCleanup }}
+        AutoPatching: ${{ inputs.AutoPatching }}
+        ConfigurationFile: ${{ inputs.ConfigurationFile }}
+        CreateMajorTag: ${{ inputs.CreateMajorTag }}
+        CreateMinorTag: ${{ inputs.CreateMinorTag }}
+        DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
+        IgnoreLabels: ${{ inputs.IgnoreLabels }}
+        IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
+        MajorLabels: ${{ inputs.MajorLabels }}
+        MinorLabels: ${{ inputs.MinorLabels }}
+        PatchLabels: ${{ inputs.PatchLabels }}
+        VersionPrefix: ${{ inputs.VersionPrefix }}
+        WhatIf: ${{ inputs.WhatIf }}
       run: |
         # Auto-Release
         Write-Host '::group::Loading libraries'
