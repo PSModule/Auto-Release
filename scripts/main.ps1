@@ -125,7 +125,7 @@ if ($latestVersionString | IsNotNullOrEmpty) {
     Write-Output '-------------------------------------------------'
     Write-Output 'Latest version:'
     $latestVersion | Format-Table
-    $latestVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $latestVersion.Major, $latestVersion.Minor, $latestVersion.Patch
+    $latestVersion = $latestVersion.ToString()
 }
 Stop-LogGroup
 
@@ -135,38 +135,33 @@ Write-Output '-------------------------------------------------'
 
 if ($createPrerelease -or $createRelease -or $whatIf) {
     Start-LogGroup 'Calculate new version'
-    $version = $latestVersion | ConvertTo-SemVer
-    $major = $version.Major
-    $minor = $version.Minor
-    $patch = $version.Patch
+    $latestVersion = New-SemVer -Version $latestVersion
+    $newVersion = New-SemVer -Version $latestVersion
+    $newVersion.Prefix = $versionPrefix
     if ($majorRelease) {
         Write-Output 'Incrementing major version.'
-        $major++
-        $minor = 0
-        $patch = 0
+        $newVersion.BumpMajor()
     } elseif ($minorRelease) {
         Write-Output 'Incrementing minor version.'
-        $minor++
-        $patch = 0
+        $newVersion.BumpMinor()
     } elseif ($patchRelease -or $autoPatching) {
         Write-Output 'Incrementing patch version.'
-        $patch++
+        $newVersion.BumpPatch()
     } else {
         Write-Output 'Skipping release creation, exiting.'
         return
     }
 
-    $newVersion = '{0}{1}.{2}.{3}' -f $versionPrefix, $major, $minor, $patch
     Write-Output "Partly new version: [$newVersion]"
 
     if ($createPrerelease) {
         Write-Output "Adding a prerelease tag to the version using the branch name [$preReleaseName]."
-        $newVersion = "$newVersion-$preReleaseName"
+        $newVersion.Prerelease = $preReleaseName
         Write-Output "Partly new version: [$newVersion]"
 
         if ($datePrereleaseFormat | IsNotNullOrEmpty) {
             Write-Output "Using date-based prerelease: [$datePrereleaseFormat]."
-            $newVersion = $newVersion + '.' + (Get-Date -Format $datePrereleaseFormat)
+            $newVersion.Prerelease += ".$(Get-Date -Format $datePrereleaseFormat)"
             Write-Output "Partly new version: [$newVersion]"
         }
 
@@ -177,14 +172,14 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 Format-Table
 
             if ($prereleases.count -gt 0) {
-                $latestPrereleaseVersion = ($prereleases[0].tagName | ConvertTo-SemVer) | Select-Object -ExpandProperty Prerelease
+                $latestPrereleaseVersion = $prereleases[0].tagName | ConvertTo-SemVer | Select-Object -ExpandProperty Prerelease
                 Write-Output "Latest prerelease:              [$latestPrereleaseVersion]"
                 $latestPrereleaseNumber = [int]($latestPrereleaseVersion -Split '\.')[-1]
                 Write-Output "Latest prerelease number:       [$latestPrereleaseNumber]"
             }
 
             $newPrereleaseNumber = 0 + $latestPrereleaseNumber + 1
-            $newVersion = $newVersion + '.' + $newPrereleaseNumber
+            $newVersion.Prerelease += ".$newPrereleaseNumber"
         }
     }
     Stop-LogGroup
