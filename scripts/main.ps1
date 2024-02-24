@@ -47,7 +47,7 @@ Write-Output '-------------------------------------------------'
 Stop-LogGroup
 
 Start-LogGroup 'Event information - JSON'
-$githubEventJson = Get-Content $env:GITHUB_ACTION_INPUT_GITHUB_EVENT_PATH
+$githubEventJson = Get-Content $env:GITHUB_EVENT_PATH
 $githubEventJson | Format-List
 Stop-LogGroup
 
