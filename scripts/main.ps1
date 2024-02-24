@@ -192,7 +192,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
     Write-Output "New version:                    [$newVersion]"
     Write-Output '-------------------------------------------------'
 
-    Write-Output "::group::Create new release [$newVersion]"
+    Start-LogGroup "Create new release [$newVersion]"
     if ($createPrerelease) {
         $releaseExists = $releases.tagName -Contains $newVersion
         if ($releaseExists -and -not $incrementalPrerelease) {
