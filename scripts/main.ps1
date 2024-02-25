@@ -1,4 +1,4 @@
-#REQUIRES -Modules Utilities, powershell-yaml
+﻿#REQUIRES -Modules Utilities, powershell-yaml
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSAvoidLongLines', '', Justification = 'Long ternary operators are used for readability.'
