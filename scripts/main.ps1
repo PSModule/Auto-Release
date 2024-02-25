@@ -243,7 +243,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         }
 
         if ($createMajorTag) {
-            $majorTag = ('{0}{1}' -f $versionPrefix, $major)
+            $majorTag = ('{0}{1}' -f $newVersion.Prefix, $newVersion.Major)
             if ($whatIf) {
                 Write-Output "WhatIf: git tag -f $majorTag 'main'"
             } else {
@@ -256,7 +256,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         }
 
         if ($createMinorTag) {
-            $minorTag = ('{0}{1}.{2}' -f $versionPrefix, $major, $minor)
+            $minorTag = ('{0}{1}.{2}' -f $newVersion.Prefix, $newVersion.Major, $newVersion.Minor)
             if ($whatIf) {
                 Write-Output "WhatIf: git tag -f $minorTag 'main'"
             } else {
@@ -291,7 +291,7 @@ $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$prereleas
 $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table
 Stop-LogGroup
 
-if (($closedPullRequest -or $createRelease) -and $autoCleanup -or $whatIf) {
+if ((($closedPullRequest -or $createRelease) -and $autoCleanup) -or $whatIf) {
     Start-LogGroup "Cleanup prereleases for [$prereleaseName]"
     foreach ($rel in $prereleasesToCleanup) {
         $relTagName = $rel.tagName
