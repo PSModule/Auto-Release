@@ -1,5 +1,8 @@
 #REQUIRES -Modules Utilities, powershell-yaml
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSAvoidLongLines', '', Justification = 'Long ternary operators are used for readability.'
+)]
 [CmdletBinding()]
 param()
 
@@ -7,6 +10,7 @@ Start-LogGroup 'Environment variables'
 Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
 Stop-LogGroup
 
+#region Set configuration
 Start-LogGroup 'Set configuration'
 if (-not (Test-Path -Path $env:GITHUB_ACTION_INPUT_ConfigurationFile -PathType Leaf)) {
     Write-Output "Configuration file not found at [$env:GITHUB_ACTION_INPUT_ConfigurationFile]"
@@ -45,7 +49,9 @@ Write-Output "Minor labels:                   [$($minorLabels -join ', ')]"
 Write-Output "Patch labels:                   [$($patchLabels -join ', ')]"
 Write-Output '-------------------------------------------------'
 Stop-LogGroup
+#endregion Set configuration
 
+#region Get event information
 Start-LogGroup 'Event information - JSON'
 $githubEventJson = Get-Content $env:GITHUB_EVENT_PATH
 $githubEventJson | Format-List
@@ -57,21 +63,29 @@ $pull_request = $githubEvent.pull_request
 $githubEvent | Format-List
 Stop-LogGroup
 
+$defaultBranchName = (gh repo view --json defaultBranchRef | ConvertFrom-Json | Select-Object -ExpandProperty defaultBranchRef).name
 $isPullRequest = $githubEvent.PSObject.Properties.Name -Contains 'pull_request'
 if (-not ($isPullRequest -or $whatIf)) {
-    'A release should not be created in this context. Exiting.'
-    return
+    Write-Warning '⚠️ A release should not be created in this context. Exiting.'
+    exit
 }
+$actionType = $githubEvent.action
+$isMerged = ($pull_request.merged).ToString() -eq 'True'
+$prIsClosed = $pull_request.state -eq 'closed'
+$prBaseRef = $pull_request.base.ref
+$prHeadRef = $pull_request.head.ref
+$targetIsDefaultBranch = $pull_request.base.ref -eq $defaultBranchName
 
 Write-Output '-------------------------------------------------'
+Write-Output "Default branch:                 [$defaultBranchName]"
 Write-Output "Is a pull request event:        [$isPullRequest]"
-Write-Output "Action type:                    [$($githubEvent.action)]"
-Write-Output "PR Merged:                      [$($pull_request.merged)]"
-Write-Output "PR State:                       [$($pull_request.state)]"
-Write-Output "PR Base Ref:                    [$($pull_request.base.ref)]"
-Write-Output "PR Head Ref:                    [$($pull_request.head.ref)]"
+Write-Output "Action type:                    [$actionType]"
+Write-Output "PR Merged:                      [$isMerged]"
+Write-Output "PR Closed:                      [$prIsClosed]"
+Write-Output "PR Base Ref:                    [$prBaseRef]"
+Write-Output "PR Head Ref:                    [$prHeadRef]"
+Write-Output "Target is default branch:       [$targetIsDefaultBranch]"
 Write-Output '-------------------------------------------------'
-$preReleaseName = $pull_request.head.ref -replace '[^a-zA-Z0-9]', ''
 
 Start-LogGroup 'Pull request - details'
 $pull_request | Format-List
@@ -82,21 +96,23 @@ $labels = @()
 $labels += $pull_request.labels.name
 $labels | Format-List
 Stop-LogGroup
+#endregion Get event information
 
-$createRelease = $pull_request.base.ref -eq 'main' -and ($pull_request.merged).ToString() -eq 'True'
-$closedPullRequest = $pull_request.state -eq 'closed' -and ($pull_request.merged).ToString() -eq 'False'
-$preRelease = $labels -Contains 'prerelease'
-$createPrerelease = $preRelease -and -not $createRelease -and -not $closedPullRequest
+#region Calculate release type
+$createRelease = $isMerged -and $targetIsDefaultBranch
+$closedPullRequest = $prIsClosed -and -not $isMerged
+$createPrerelease = $labels -Contains 'prerelease' -and -not $createRelease -and -not $closedPullRequest
+$prereleaseName = $prHeadRef -replace '[^a-zA-Z0-9]'
 
 $ignoreRelease = ($labels | Where-Object { $ignoreLabels -contains $_ }).Count -gt 0
-$majorRelease = ($labels | Where-Object { $majorLabels -contains $_ }).Count -gt 0
-$minorRelease = ($labels | Where-Object { $minorLabels -contains $_ }).Count -gt 0 -and -not $majorRelease
-$patchRelease = ($labels | Where-Object { $patchLabels -contains $_ }).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
-
 if ($ignoreRelease) {
     Write-Output 'Ignoring release creation.'
     return
 }
+
+$majorRelease = ($labels | Where-Object { $majorLabels -contains $_ }).Count -gt 0
+$minorRelease = ($labels | Where-Object { $minorLabels -contains $_ }).Count -gt 0 -and -not $majorRelease
+$patchRelease = ($labels | Where-Object { $patchLabels -contains $_ }).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
 
 Write-Output '-------------------------------------------------'
 Write-Output "Create a release:               [$createRelease]"
@@ -106,7 +122,9 @@ Write-Output "Create a minor release:         [$minorRelease]"
 Write-Output "Create a patch release:         [$patchRelease]"
 Write-Output "Closed pull request:            [$closedPullRequest]"
 Write-Output '-------------------------------------------------'
+#endregion Calculate release type
 
+#region Get releases
 Start-LogGroup 'Get releases'
 $releases = gh release list --json 'createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName' | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) {
@@ -115,7 +133,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 $releases | Select-Object -Property name, isPrerelease, isLatest, publishedAt | Format-Table
 Stop-LogGroup
+#endregion Get releases
 
+#region Get latest version
 Start-LogGroup 'Get latest version'
 $latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
 $latestRelease | Format-List
@@ -132,7 +152,9 @@ Stop-LogGroup
 Write-Output '-------------------------------------------------'
 Write-Output "Latest version:                 [$latestVersion]"
 Write-Output '-------------------------------------------------'
+#endregion Get latest version
 
+#region Create a new version
 if ($createPrerelease -or $createRelease -or $whatIf) {
     Start-LogGroup 'Calculate new version'
     $latestVersion = New-SemVer -Version $latestVersion
@@ -155,8 +177,8 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
     Write-Output "Partly new version: [$newVersion]"
 
     if ($createPrerelease) {
-        Write-Output "Adding a prerelease tag to the version using the branch name [$preReleaseName]."
-        $newVersion.Prerelease = $preReleaseName
+        Write-Output "Adding a prerelease tag to the version using the branch name [$prereleaseName]."
+        $newVersion.Prerelease = $prereleaseName
         Write-Output "Partly new version: [$newVersion]"
 
         if ($datePrereleaseFormat | IsNotNullOrEmpty) {
@@ -274,14 +296,16 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
 } else {
     Write-Output 'Skipping release creation.'
 }
+#endregion Create a new version
 
+#region Cleanup prereleases
 Start-LogGroup 'List prereleases using the same name'
-$prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$preReleaseName*" }
+$prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$prereleaseName*" }
 $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table
 Stop-LogGroup
 
 if (($closedPullRequest -or $createRelease) -and $autoCleanup -or $whatIf) {
-    Write-Output "::group::Cleanup prereleases for [$preReleaseName]"
+    Start-LogGroup "Cleanup prereleases for [$prereleaseName]"
     foreach ($rel in $prereleasesToCleanup) {
         $relTagName = $rel.tagName
         Write-Output "Deleting prerelease:            [$relTagName]."
@@ -297,3 +321,4 @@ if (($closedPullRequest -or $createRelease) -and $autoCleanup -or $whatIf) {
     }
     Stop-LogGroup
 }
+#endregion Cleanup prereleases
