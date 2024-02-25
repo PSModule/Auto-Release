@@ -188,7 +188,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         }
 
         if ($incrementalPrerelease) {
-            $newVersion.BumpPrerelease()
+            $newVersion.BumpPrereleaseNumber()
         }
     }
     Stop-LogGroup
