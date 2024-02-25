@@ -174,34 +174,21 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         return
     }
 
-    Write-Output "Partly new version: [$newVersion]"
+    Write-Output "Partial new version: [$newVersion]"
 
     if ($createPrerelease) {
         Write-Output "Adding a prerelease tag to the version using the branch name [$prereleaseName]."
         $newVersion.Prerelease = $prereleaseName
-        Write-Output "Partly new version: [$newVersion]"
+        Write-Output "Partial new version: [$newVersion]"
 
         if ($datePrereleaseFormat | IsNotNullOrEmpty) {
             Write-Output "Using date-based prerelease: [$datePrereleaseFormat]."
             $newVersion.Prerelease += ".$(Get-Date -Format $datePrereleaseFormat)"
-            Write-Output "Partly new version: [$newVersion]"
+            Write-Output "Partial new version: [$newVersion]"
         }
 
         if ($incrementalPrerelease) {
-            $prereleases = $releases | Where-Object { $_.tagName -like "$newVersion*" }
-            $prereleases |
-                Select-Object -Property @{n = 'number'; e = { [int](($_.tagName -Split '\.')[-1]) } }, name, publishedAt, isPrerelease, isLatest |
-                Format-Table
-
-            if ($prereleases.count -gt 0) {
-                $latestPrereleaseVersion = $prereleases[0].tagName | ConvertTo-SemVer | Select-Object -ExpandProperty Prerelease
-                Write-Output "Latest prerelease:              [$latestPrereleaseVersion]"
-                $latestPrereleaseNumber = [int]($latestPrereleaseVersion -Split '\.')[-1]
-                Write-Output "Latest prerelease number:       [$latestPrereleaseNumber]"
-            }
-
-            $newPrereleaseNumber = 0 + $latestPrereleaseNumber + 1
-            $newVersion.Prerelease += ".$newPrereleaseNumber"
+            $newVersion.BumpPrerelease()
         }
     }
     Stop-LogGroup
@@ -226,9 +213,9 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         }
 
         if ($whatIf) {
-            Write-Output "WhatIf: gh release create $newVersion --title $newVersion --target $($pull_request.head.ref) --generate-notes --prerelease"
+            Write-Output "WhatIf: gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease"
         } else {
-            gh release create $newVersion --title $newVersion --target $pull_request.head.ref --generate-notes --prerelease
+            gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease
             if ($LASTEXITCODE -ne 0) {
                 Write-Error "Failed to create the release [$newVersion]."
                 exit $LASTEXITCODE
