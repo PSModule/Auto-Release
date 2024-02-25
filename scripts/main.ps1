@@ -215,7 +215,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         if ($whatIf) {
             Write-Output "WhatIf: gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease"
         } else {
-            gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease
+            $releaseURL = gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease
             if ($LASTEXITCODE -ne 0) {
                 Write-Error "Failed to create the release [$newVersion]."
                 exit $LASTEXITCODE
@@ -225,7 +225,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
         if ($whatIf) {
             Write-Output 'WhatIf: gh pr comment $pull_request.number -b "The release [$newVersion] has been created."'
         } else {
-            gh pr comment $pull_request.number -b "The release [$newVersion] has been created."
+            gh pr comment $pull_request.number -b "The release [$newVersion]($releaseURL) has been created."
             if ($LASTEXITCODE -ne 0) {
                 Write-Error 'Failed to comment on the pull request.'
                 exit $LASTEXITCODE
