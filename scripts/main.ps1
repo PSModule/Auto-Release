@@ -59,21 +59,41 @@ Stop-LogGroup
 
 Start-LogGroup 'Event information - Object'
 $githubEvent = $githubEventJson | ConvertFrom-Json
-$pull_request = $githubEvent.pull_request
 $githubEvent | Format-List
 Stop-LogGroup
 
-$defaultBranchName = (gh repo view --json defaultBranchRef | ConvertFrom-Json | Select-Object -ExpandProperty defaultBranchRef).name
-$isPullRequest = $githubEvent.PSObject.Properties.Name -Contains 'pull_request'
+Start-LogGroup 'Event information - Process'
+$githubEventType = $env:GITHUB_EVENT_NAME
+switch ($githubEventType) {
+    'pull_request' {
+        $githubEvent = $githubEvent.pull_request
+        $isPullRequest = $true
+    }
+    'pull_request_target' {
+        $githubEvent = $githubEvent.pull_request
+        $isPullRequest = $true
+    }
+    'push' {
+        $githubEvent = $githubEvent
+        $whatIf = $true
+    }
+    default {
+        Write-Warning "Unsupported event type [$githubEventType]. Exiting."
+        exit 1
+    }
+}
+
 if (-not ($isPullRequest -or $whatIf)) {
     Write-Warning '⚠️ A release should not be created in this context. Exiting.'
     exit
 }
+
 $actionType = $githubEvent.action
 $isMerged = ($pull_request.merged).ToString() -eq 'True'
 $prIsClosed = $pull_request.state -eq 'closed'
 $prBaseRef = $pull_request.base.ref
 $prHeadRef = $pull_request.head.ref
+$defaultBranchName = (gh repo view --json defaultBranchRef | ConvertFrom-Json | Select-Object -ExpandProperty defaultBranchRef).name
 $targetIsDefaultBranch = $pull_request.base.ref -eq $defaultBranchName
 
 Write-Output '-------------------------------------------------'
