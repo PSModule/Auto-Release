@@ -112,7 +112,7 @@ if ($ignoreRelease) {
 
 $majorRelease = ($labels | Where-Object { $majorLabels -contains $_ }).Count -gt 0
 $minorRelease = ($labels | Where-Object { $minorLabels -contains $_ }).Count -gt 0 -and -not $majorRelease
-$patchRelease = ($labels | Where-Object { $patchLabels -contains $_ }).Count -gt 0 -and -not $majorRelease -and -not $minorRelease
+$patchRelease = (($labels | Where-Object { $patchLabels -contains $_ }).Count -gt 0 -or $autoPatching) -and -not $majorRelease -and -not $minorRelease
 
 Write-Output '-------------------------------------------------'
 Write-Output "Create a release:               [$createRelease]"
@@ -166,7 +166,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
     } elseif ($minorRelease) {
         Write-Output 'Incrementing minor version.'
         $newVersion.BumpMinor()
-    } elseif ($patchRelease -or $autoPatching) {
+    } elseif ($patchRelease) {
         Write-Output 'Incrementing patch version.'
         $newVersion.BumpPatch()
     } else {
