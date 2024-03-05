@@ -1,4 +1,4 @@
-name: Auto Release (by PSModule)
+name: Auto-Release (by PSModule)
 description: Automatically creates releases based on pull requests and labels.
 author: PSModule
 branding:
