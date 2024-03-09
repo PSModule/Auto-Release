@@ -2,8 +2,8 @@ name: Auto Release (by PSModule)
 description: Automatically creates releases based on pull requests and labels.
 author: PSModule
 branding:
-  icon: activity
-  color: blue
+  icon: upload-cloud
+  color: white
 
 inputs:
   AutoCleanup:
