@@ -1,4 +1,4 @@
-﻿#REQUIRES -Modules Utilities, powershell-yaml
+﻿#REQUIRES -Modules Utilities, powershell-yaml, PSSemVer
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSAvoidLongLines', '', Justification = 'Long ternary operators are used for readability.'
@@ -141,7 +141,7 @@ $latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
 $latestRelease | Format-List
 $latestVersionString = $latestRelease.tagName
 if ($latestVersionString | IsNotNullOrEmpty) {
-    $latestVersion = $latestVersionString | ConvertTo-SemVer
+    $latestVersion = $latestVersionString | ConvertTo-PSSemVer
     Write-Output '-------------------------------------------------'
     Write-Output 'Latest version:'
     $latestVersion | Format-Table
@@ -157,8 +157,8 @@ Write-Output '-------------------------------------------------'
 #region Create a new version
 if ($createPrerelease -or $createRelease -or $whatIf) {
     Start-LogGroup 'Calculate new version'
-    $latestVersion = New-SemVer -Version $latestVersion
-    $newVersion = New-SemVer -Version $latestVersion
+    $latestVersion = New-PSSemVer -Version $latestVersion
+    $newVersion = New-PSSemVer -Version $latestVersion
     $newVersion.Prefix = $versionPrefix
     if ($majorRelease) {
         Write-Output 'Incrementing major version.'
