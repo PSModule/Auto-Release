@@ -82,7 +82,7 @@ on:
       - labeled
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   Auto-Release:
