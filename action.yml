@@ -63,7 +63,7 @@ runs:
   using: composite
   steps:
     - name: Auto-Release
-      shell: pwsh
+      uses: PSModule/GitHub-Script@v1
       env:
         GITHUB_ACTION_INPUT_AutoCleanup: ${{ inputs.AutoCleanup }}
         GITHUB_ACTION_INPUT_AutoPatching: ${{ inputs.AutoPatching }}
@@ -78,10 +78,7 @@ runs:
         GITHUB_ACTION_INPUT_PatchLabels: ${{ inputs.PatchLabels }}
         GITHUB_ACTION_INPUT_VersionPrefix: ${{ inputs.VersionPrefix }}
         GITHUB_ACTION_INPUT_WhatIf: ${{ inputs.WhatIf }}
-      run: |
-        # Auto-Release
-        Write-Host '::group::Loading libraries'
-        Install-PSResource -Name 'Utilities', 'powershell-yaml', 'PSSemVer' -TrustRepository -Verbose
-        Write-Host '::endgroup::'
-
-        . "${{ github.action_path }}\scripts\main.ps1" -Verbose
+      with:
+        Script: |
+          # Auto-Release
+          . "${{ github.action_path }}\scripts\main.ps1"
