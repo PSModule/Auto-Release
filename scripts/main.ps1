@@ -1,6 +1,10 @@
 ﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSAvoidLongLines', '', Justification = 'Long ternary operators are used for readability.'
 )]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', '',
+    Justification = 'Parameter is used in dynamic parameter validation.'
+)]
 [CmdletBinding()]
 param()
 
