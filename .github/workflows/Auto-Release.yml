@@ -30,5 +30,7 @@ jobs:
 
       - name: Auto-Release
         uses: ./
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # Used for GitHub CLI authentication
         with:
           IncrementalPrerelease: false
