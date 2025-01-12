@@ -80,7 +80,7 @@ try {
     LogGroup 'Event information - Object' {
         $githubEvent = $githubEventJson | ConvertFrom-Json
         if (-not $githubEvent.pull_request) {
-            Write-Warning '⚠️ This is not run for a pull request. Exiting.'
+            Write-GitHubWarning 'This is not run for a pull request. Exiting.'
             exit
         }
         $pull_request = $githubEvent.pull_request
