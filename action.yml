@@ -81,4 +81,4 @@ runs:
       with:
         Script: |
           # Auto-Release
-          . "${{ github.action_path }}\scripts\main.ps1"
+          ${{ github.action_path }}\scripts\main.ps1
