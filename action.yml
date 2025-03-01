@@ -58,6 +58,25 @@ inputs:
     description: If specified, the action will only log the changes it would make, but will not actually create or delete any releases or tags.
     required: false
     default: 'false'
+  Debug:
+    description: Enable debug output.
+    required: false
+    default: 'false'
+  Verbose:
+    description: Enable verbose output.
+    required: false
+    default: 'false'
+  Version:
+    description: Specifies the version of the GitHub module to be installed. The value must be an exact version.
+    required: false
+  Prerelease:
+    description: Allow prerelease versions if available.
+    required: false
+    default: 'false'
+  WorkingDirectory:
+    description: The working directory where the script will run from.
+    required: false
+    default: ${{ github.workspace }}
 
 runs:
   using: composite
@@ -65,20 +84,25 @@ runs:
     - name: Auto-Release
       uses: PSModule/GitHub-Script@v1
       env:
-        GITHUB_ACTION_INPUT_AutoCleanup: ${{ inputs.AutoCleanup }}
-        GITHUB_ACTION_INPUT_AutoPatching: ${{ inputs.AutoPatching }}
-        GITHUB_ACTION_INPUT_ConfigurationFile: ${{ inputs.ConfigurationFile }}
-        GITHUB_ACTION_INPUT_CreateMajorTag: ${{ inputs.CreateMajorTag }}
-        GITHUB_ACTION_INPUT_CreateMinorTag: ${{ inputs.CreateMinorTag }}
-        GITHUB_ACTION_INPUT_DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
-        GITHUB_ACTION_INPUT_IgnoreLabels: ${{ inputs.IgnoreLabels }}
-        GITHUB_ACTION_INPUT_IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
-        GITHUB_ACTION_INPUT_MajorLabels: ${{ inputs.MajorLabels }}
-        GITHUB_ACTION_INPUT_MinorLabels: ${{ inputs.MinorLabels }}
-        GITHUB_ACTION_INPUT_PatchLabels: ${{ inputs.PatchLabels }}
-        GITHUB_ACTION_INPUT_VersionPrefix: ${{ inputs.VersionPrefix }}
-        GITHUB_ACTION_INPUT_WhatIf: ${{ inputs.WhatIf }}
+        PSMODULE_AUTO_RELEASE_INPUT_AutoCleanup: ${{ inputs.AutoCleanup }}
+        PSMODULE_AUTO_RELEASE_INPUT_AutoPatching: ${{ inputs.AutoPatching }}
+        PSMODULE_AUTO_RELEASE_INPUT_ConfigurationFile: ${{ inputs.ConfigurationFile }}
+        PSMODULE_AUTO_RELEASE_INPUT_CreateMajorTag: ${{ inputs.CreateMajorTag }}
+        PSMODULE_AUTO_RELEASE_INPUT_CreateMinorTag: ${{ inputs.CreateMinorTag }}
+        PSMODULE_AUTO_RELEASE_INPUT_DatePrereleaseFormat: ${{ inputs.DatePrereleaseFormat }}
+        PSMODULE_AUTO_RELEASE_INPUT_IgnoreLabels: ${{ inputs.IgnoreLabels }}
+        PSMODULE_AUTO_RELEASE_INPUT_IncrementalPrerelease: ${{ inputs.IncrementalPrerelease }}
+        PSMODULE_AUTO_RELEASE_INPUT_MajorLabels: ${{ inputs.MajorLabels }}
+        PSMODULE_AUTO_RELEASE_INPUT_MinorLabels: ${{ inputs.MinorLabels }}
+        PSMODULE_AUTO_RELEASE_INPUT_PatchLabels: ${{ inputs.PatchLabels }}
+        PSMODULE_AUTO_RELEASE_INPUT_VersionPrefix: ${{ inputs.VersionPrefix }}
+        PSMODULE_AUTO_RELEASE_INPUT_WhatIf: ${{ inputs.WhatIf }}
       with:
+        Debug: ${{ inputs.Debug }}
+        Prerelease: ${{ inputs.Prerelease }}
+        Verbose: ${{ inputs.Verbose }}
+        Version: ${{ inputs.Version }}
+        WorkingDirectory: ${{ inputs.WorkingDirectory }}
         Script: |
           # Auto-Release
-          ${{ github.action_path }}\scripts\main.ps1
+          ${{ github.action_path }}/scripts/main.ps1

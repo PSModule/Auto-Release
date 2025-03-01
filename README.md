@@ -27,7 +27,9 @@ The following labels will inform the action what kind of release to create:
 
 When a pull request is closed, the action will create a release based on the labels and clean up any previous prereleases that was created.
 
-> Note: The labels can be configured using the `MajorLabels`, `MinorLabels` and `PatchLabels` parameters/settings in the configuration file to trigger on other labels.
+> [!NOTE]
+> The labels can be configured using the `MajorLabels`, `MinorLabels` and `PatchLabels` parameters/settings in the configuration file to trigger
+> on other labels.
 
 ## Usage
 
@@ -48,6 +50,11 @@ The action can be configured using the following settings:
 | `PatchLabels` | A comma separated list of labels that trigger a patch release. | `patch, fix` | false |
 | `VersionPrefix` | The prefix to use for the version number. | `v` | false |
 | `WhatIf` | Control wether to simulate the action. If enabled, the action will not create any releases. Used for testing. | `false` | false |
+| `Debug` | Enable debug output. | `'false'` | false |
+| `Verbose` | Enable verbose output. | `'false'` | false |
+| `Version` | Specifies the exact version of the GitHub module to install. | | false |
+| `Prerelease` | Allow prerelease versions if available. | `'false'` | false |
+| `WorkingDirectory` | The working directory where the script runs. | `${{ github.workspace }}` | false |
 
 ### Configuration file
 
