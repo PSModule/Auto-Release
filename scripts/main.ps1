@@ -29,7 +29,7 @@ LogGroup 'Loading libraries' {
 }
 
 LogGroup 'Environment variables' {
-    Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize
+    Get-ChildItem -Path Env: | Select-Object Name, Value | Sort-Object Name | Format-Table -AutoSize | Out-String
 }
 
 LogGroup 'Set configuration' {
@@ -73,7 +73,7 @@ LogGroup 'Set configuration' {
 
 LogGroup 'Event information - JSON' {
     $githubEventJson = Get-Content $env:GITHUB_EVENT_PATH
-    $githubEventJson | Format-List
+    $githubEventJson | Format-List | Out-String
 }
 
 LogGroup 'Event information - Object' {
@@ -83,7 +83,7 @@ LogGroup 'Event information - Object' {
         exit
     }
     $pull_request = $githubEvent.pull_request
-    $githubEvent | Format-List
+    $githubEvent | Format-List | Out-String
 }
 
 $defaultBranchName = (gh repo view --json defaultBranchRef | ConvertFrom-Json | Select-Object -ExpandProperty defaultBranchRef).name
@@ -111,13 +111,13 @@ Write-Output "Target is default branch:       [$targetIsDefaultBranch]"
 Write-Output '-------------------------------------------------'
 
 LogGroup 'Pull request - details' {
-    $pull_request | Format-List
+    $pull_request | Format-List | Out-String
 }
 
 LogGroup 'Pull request - Labels' {
     $labels = @()
     $labels += $pull_request.labels.name
-    $labels | Format-List
+    $labels | Format-List | Out-String
 }
 
 $createRelease = $isMerged -and $targetIsDefaultBranch
@@ -150,12 +150,12 @@ LogGroup 'Get releases' {
         Write-Error 'Failed to list all releases for the repo.'
         exit $LASTEXITCODE
     }
-    $releases | Select-Object -Property name, isPrerelease, isLatest, publishedAt | Format-Table
+    $releases | Select-Object -Property name, isPrerelease, isLatest, publishedAt | Format-Table | Out-String
 }
 
 LogGroup 'Get latest version' {
     $latestRelease = $releases | Where-Object { $_.isLatest -eq $true }
-    $latestRelease | Format-List
+    $latestRelease | Format-List | Out-String
     $latestVersionString = $latestRelease.tagName
     if ($latestVersionString | IsNotNullOrEmpty) {
         $latestVersion = $latestVersionString | ConvertTo-PSSemVer
@@ -301,7 +301,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
 
 LogGroup 'List prereleases using the same name' {
     $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$prereleaseName*" }
-    $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table
+    $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table | Out-String
 }
 
 if ((($closedPullRequest -or $createRelease) -and $autoCleanup) -or $whatIf) {
