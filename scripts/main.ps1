@@ -192,128 +192,128 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             $newVersion.Prerelease = $prereleaseName
             Write-Output "Partial new version: [$newVersion]"
 
-            if ([string]::IsNullOrEmpty($datePrereleaseFormat) {
-                    Write-Output "Using date-based prerelease: [$datePrereleaseFormat]."
-                    $newVersion.Prerelease += ".$(Get-Date -Format $datePrereleaseFormat)"
-                    Write-Output "Partial new version: [$newVersion]"
-                }
+            if ([string]::IsNullOrEmpty($datePrereleaseFormat)) {
+                Write-Output "Using date-based prerelease: [$datePrereleaseFormat]."
+                $newVersion.Prerelease += ".$(Get-Date -Format $datePrereleaseFormat)"
+                Write-Output "Partial new version: [$newVersion]"
+            }
 
-                if ($incrementalPrerelease) {
-                    $newVersion.BumpPrereleaseNumber()
-                }
+            if ($incrementalPrerelease) {
+                $newVersion.BumpPrereleaseNumber()
             }
         }
-        Write-Output '-------------------------------------------------'
-        Write-Output "New version:                    [$newVersion]"
-        Write-Output '-------------------------------------------------'
+    }
+    Write-Output '-------------------------------------------------'
+    Write-Output "New version:                    [$newVersion]"
+    Write-Output '-------------------------------------------------'
 
-        LogGroup "Create new release [$newVersion]" {
-            if ($createPrerelease) {
-                $releaseExists = $releases.tagName -Contains $newVersion
-                if ($releaseExists -and -not $incrementalPrerelease) {
-                    Write-Output 'Release already exists, recreating.'
-                    if ($whatIf) {
-                        Write-Output "WhatIf: gh release delete $newVersion --cleanup-tag --yes"
-                    } else {
-                        gh release delete $newVersion --cleanup-tag --yes
-                        if ($LASTEXITCODE -ne 0) {
-                            Write-Error "Failed to delete the release [$newVersion]."
-                            exit $LASTEXITCODE
-                        }
-                    }
-                }
-
+    LogGroup "Create new release [$newVersion]" {
+        if ($createPrerelease) {
+            $releaseExists = $releases.tagName -Contains $newVersion
+            if ($releaseExists -and -not $incrementalPrerelease) {
+                Write-Output 'Release already exists, recreating.'
                 if ($whatIf) {
-                    Write-Output "WhatIf: gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease"
+                    Write-Output "WhatIf: gh release delete $newVersion --cleanup-tag --yes"
                 } else {
-                    $releaseURL = gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease
+                    gh release delete $newVersion --cleanup-tag --yes
                     if ($LASTEXITCODE -ne 0) {
-                        Write-Error "Failed to create the release [$newVersion]."
+                        Write-Error "Failed to delete the release [$newVersion]."
                         exit $LASTEXITCODE
                     }
                 }
+            }
 
-                if ($whatIf) {
-                    Write-Output 'WhatIf: gh pr comment $pull_request.number -b "The release [$newVersion] has been created."'
-                } else {
-                    gh pr comment $pull_request.number -b "The release [$newVersion]($releaseURL) has been created."
-                    if ($LASTEXITCODE -ne 0) {
-                        Write-Error 'Failed to comment on the pull request.'
-                        exit $LASTEXITCODE
-                    }
-                }
+            if ($whatIf) {
+                Write-Output "WhatIf: gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease"
             } else {
+                $releaseURL = gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Failed to create the release [$newVersion]."
+                    exit $LASTEXITCODE
+                }
+            }
+
+            if ($whatIf) {
+                Write-Output 'WhatIf: gh pr comment $pull_request.number -b "The release [$newVersion] has been created."'
+            } else {
+                gh pr comment $pull_request.number -b "The release [$newVersion]($releaseURL) has been created."
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error 'Failed to comment on the pull request.'
+                    exit $LASTEXITCODE
+                }
+            }
+        } else {
+            if ($whatIf) {
+                Write-Output "WhatIf: gh release create $newVersion --title $newVersion --generate-notes"
+            } else {
+                gh release create $newVersion --title $newVersion --generate-notes
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Failed to create the release [$newVersion]."
+                    exit $LASTEXITCODE
+                }
+            }
+
+            if ($createMajorTag) {
+                $majorTag = ('{0}{1}' -f $newVersion.Prefix, $newVersion.Major)
                 if ($whatIf) {
-                    Write-Output "WhatIf: gh release create $newVersion --title $newVersion --generate-notes"
+                    Write-Output "WhatIf: git tag -f $majorTag 'main'"
                 } else {
-                    gh release create $newVersion --title $newVersion --generate-notes
+                    git tag -f $majorTag 'main'
                     if ($LASTEXITCODE -ne 0) {
-                        Write-Error "Failed to create the release [$newVersion]."
-                        exit $LASTEXITCODE
-                    }
-                }
-
-                if ($createMajorTag) {
-                    $majorTag = ('{0}{1}' -f $newVersion.Prefix, $newVersion.Major)
-                    if ($whatIf) {
-                        Write-Output "WhatIf: git tag -f $majorTag 'main'"
-                    } else {
-                        git tag -f $majorTag 'main'
-                        if ($LASTEXITCODE -ne 0) {
-                            Write-Error "Failed to create major tag [$majorTag]."
-                            exit $LASTEXITCODE
-                        }
-                    }
-                }
-
-                if ($createMinorTag) {
-                    $minorTag = ('{0}{1}.{2}' -f $newVersion.Prefix, $newVersion.Major, $newVersion.Minor)
-                    if ($whatIf) {
-                        Write-Output "WhatIf: git tag -f $minorTag 'main'"
-                    } else {
-                        git tag -f $minorTag 'main'
-                        if ($LASTEXITCODE -ne 0) {
-                            Write-Error "Failed to create minor tag [$minorTag]."
-                            exit $LASTEXITCODE
-                        }
-                    }
-                }
-
-                if ($whatIf) {
-                    Write-Output 'WhatIf: git push origin --tags --force'
-                } else {
-                    git push origin --tags --force
-                    if ($LASTEXITCODE -ne 0) {
-                        Write-Error 'Failed to push tags.'
+                        Write-Error "Failed to create major tag [$majorTag]."
                         exit $LASTEXITCODE
                     }
                 }
             }
-        }
-        Write-GitHubNotice -Title 'Release created' -Message $newVersion
-    } else {
-        Write-Output 'Skipping release creation.'
-    }
 
-    LogGroup 'List prereleases using the same name' {
-        $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$prereleaseName*" }
-        $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table | Out-String
-    }
-
-    if ((($closedPullRequest -or $createRelease) -and $autoCleanup) -or $whatIf) {
-        LogGroup "Cleanup prereleases for [$prereleaseName]" {
-            foreach ($rel in $prereleasesToCleanup) {
-                $relTagName = $rel.tagName
-                Write-Output "Deleting prerelease:            [$relTagName]."
+            if ($createMinorTag) {
+                $minorTag = ('{0}{1}.{2}' -f $newVersion.Prefix, $newVersion.Major, $newVersion.Minor)
                 if ($whatIf) {
-                    Write-Output "WhatIf: gh release delete $($rel.tagName) --cleanup-tag --yes"
+                    Write-Output "WhatIf: git tag -f $minorTag 'main'"
                 } else {
-                    gh release delete $rel.tagName --cleanup-tag --yes
+                    git tag -f $minorTag 'main'
                     if ($LASTEXITCODE -ne 0) {
-                        Write-Error "Failed to delete release [$relTagName]."
+                        Write-Error "Failed to create minor tag [$minorTag]."
                         exit $LASTEXITCODE
                     }
                 }
             }
+
+            if ($whatIf) {
+                Write-Output 'WhatIf: git push origin --tags --force'
+            } else {
+                git push origin --tags --force
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error 'Failed to push tags.'
+                    exit $LASTEXITCODE
+                }
+            }
         }
     }
+    Write-GitHubNotice -Title 'Release created' -Message $newVersion
+} else {
+    Write-Output 'Skipping release creation.'
+}
+
+LogGroup 'List prereleases using the same name' {
+    $prereleasesToCleanup = $releases | Where-Object { $_.tagName -like "*$prereleaseName*" }
+    $prereleasesToCleanup | Select-Object -Property name, publishedAt, isPrerelease, isLatest | Format-Table | Out-String
+}
+
+if ((($closedPullRequest -or $createRelease) -and $autoCleanup) -or $whatIf) {
+    LogGroup "Cleanup prereleases for [$prereleaseName]" {
+        foreach ($rel in $prereleasesToCleanup) {
+            $relTagName = $rel.tagName
+            Write-Output "Deleting prerelease:            [$relTagName]."
+            if ($whatIf) {
+                Write-Output "WhatIf: gh release delete $($rel.tagName) --cleanup-tag --yes"
+            } else {
+                gh release delete $rel.tagName --cleanup-tag --yes
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Failed to delete release [$relTagName]."
+                    exit $LASTEXITCODE
+                }
+            }
+        }
+    }
+}
