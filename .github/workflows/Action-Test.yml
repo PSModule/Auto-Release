@@ -26,7 +26,5 @@ jobs:
 
       - name: Action-Test
         uses: ./
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         with:
           WhatIf: true
