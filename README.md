@@ -2,6 +2,7 @@
 
 Automatically creates releases based on pull requests and labels.
 
+
 ## Specifications and practices
 
 Auto-Release follows:
@@ -31,6 +32,7 @@ When a pull request is closed, the action will create a release based on the lab
 > The labels can be configured using the `MajorLabels`, `MinorLabels` and `PatchLabels` parameters/settings in the configuration file to trigger
 > on other labels.
 
+This action is built on [GitHub-Script](https://github.com/PSModule/GitHub-Script) which by default uses the `GITHUB_TOKEN`.
 ## Usage
 
 The action can be configured using the following settings:
@@ -100,8 +102,6 @@ jobs:
 
       - name: Auto-Release
         uses: PSModule/Auto-Release@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }} # Used for GitHub CLI authentication
 ```
 
 ## Permissions
