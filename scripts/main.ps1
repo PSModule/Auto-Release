@@ -11,20 +11,23 @@ param()
 LogGroup 'Loading libraries' {
     'powershell-yaml', 'PSSemVer' | ForEach-Object {
         $name = $_
+        Write-Output "Installing module: $name"
         $count = 5
         $delay = 10
         for ($i = 1; $i -le $count; $i++) {
             try {
-                Install-PSResource -Name $name -TrustRepository -ErrorAction Stop
+                Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
                 break
             } catch {
-                Write-Warning $_.Exception.Message
+                Write-Warning "Installation of $name failed with error: $_"
                 if ($i -eq $count) {
                     throw $_
                 }
+                Write-Warning "Retrying in $delay seconds..."
                 Start-Sleep -Seconds $delay
             }
         }
+        Import-Module -Name $name
     }
 }
 
