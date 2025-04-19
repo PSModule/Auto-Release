@@ -231,7 +231,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
 
             # Build release creation command with options
-            $releaseCreateCommand = "gh release create $newVersion"
+            $releaseCreateCommand = "release create $newVersion"
 
             # Add title parameter
             if ($usePRTitleAsReleaseName) {
@@ -258,7 +258,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 Write-Output "WhatIf: $releaseCreateCommand"
             } else {
                 # Execute the command and capture the output
-                $releaseURL = & $releaseCreateCommand
+                $releaseURL = gh $releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Failed to create the release [$newVersion]."
                     exit $LASTEXITCODE
@@ -276,7 +276,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
         } else {
             # Build release creation command with options
-            $releaseCreateCommand = "gh release create $newVersion"
+            $releaseCreateCommand = "release create $newVersion"
 
             # Add title parameter
             if ($usePRTitleAsReleaseName) {
@@ -300,7 +300,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 Write-Output "WhatIf: $releaseCreateCommand"
             } else {
                 # Execute the command
-                & $releaseCreateCommand
+                gh $releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Failed to create the release [$newVersion]."
                     exit $LASTEXITCODE
