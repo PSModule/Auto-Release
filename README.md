@@ -50,8 +50,8 @@ The action can be configured using the following settings:
 | `MajorLabels` | A comma separated list of labels that trigger a major release. | `major, breaking` | false |
 | `MinorLabels` | A comma separated list of labels that trigger a minor release. | `minor, feature` | false |
 | `PatchLabels` | A comma separated list of labels that trigger a patch release. | `patch, fix` | false |
+| `UsePRTitleAsReleaseName` | When enabled, uses the pull request title as the name for the GitHub release. | `false` | false |
 | `UsePRBodyAsReleaseNotes` | When enabled, uses the pull request body as the release notes for the GitHub release. | `true` | false |
-| `UsePRTitleAsReleaseName` | When enabled, uses the pull request title as the name for the GitHub release. | `true` | false |
 | `VersionPrefix` | The prefix to use for the version number. | `v` | false |
 | `WhatIf` | Control wether to simulate the action. If enabled, the action will not create any releases. Used for testing. | `false` | false |
 | `Debug` | Enable debug output. | `'false'` | false |
