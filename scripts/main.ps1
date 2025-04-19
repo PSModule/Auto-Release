@@ -281,16 +281,16 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             # Add title parameter
             if ($usePRTitleAsReleaseName) {
                 $prTitle = $pull_request.title
-                $releaseCreateCommand += @(" --title", "'$prTitle'")
+                $releaseCreateCommand += @("--title", "$prTitle")
                 Write-Output "Using PR title as release name: [$prTitle]"
             } else {
-                $releaseCreateCommand += @(" --title", "$newVersion")
+                $releaseCreateCommand += @("--title", "$newVersion")
             }
 
             # Add notes parameter
             if ($usePRBodyAsReleaseNotes) {
                 $prBody = $pull_request.body
-                $releaseCreateCommand += @(" --notes", "'$prBody'")
+                $releaseCreateCommand += @("--notes", "$prBody")
                 Write-Output 'Using PR body as release notes'
             } else {
                 $releaseCreateCommand += '--generate-notes'
