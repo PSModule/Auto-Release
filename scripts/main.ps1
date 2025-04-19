@@ -258,7 +258,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 Write-Output "WhatIf: $releaseCreateCommand"
             } else {
                 # Execute the command and capture the output
-                $releaseURL = & $releaseCreateCommand
+                $releaseURL = Start-Process $releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Failed to create the release [$newVersion]."
                     exit $LASTEXITCODE
@@ -300,7 +300,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 Write-Output "WhatIf: $releaseCreateCommand"
             } else {
                 # Execute the command
-                & $releaseCreateCommand
+                Start-Process $releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Failed to create the release [$newVersion]."
                     exit $LASTEXITCODE
