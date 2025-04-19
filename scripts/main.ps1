@@ -276,7 +276,7 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
         } else {
             # Build release creation command with options
-            $releaseCreateCommand = @("gh", "release", "create", "$newVersion")
+            $releaseCreateCommand = @("release", "create", "$newVersion")
 
             # Add title parameter
             if ($usePRTitleAsReleaseName) {
