@@ -4,7 +4,8 @@
         "consoleFull"
     ],
     "ignore": [
-        "**/tests/**"
+        "**/tests/**",
+        "**/scripts/**"
     ],
     "absolute": true
 }
