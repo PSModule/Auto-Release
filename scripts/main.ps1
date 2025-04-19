@@ -45,6 +45,8 @@ LogGroup 'Set configuration' {
     $createMinorTag = ![string]::IsNullOrEmpty($configuration.CreateMinorTag) ? $configuration.CreateMinorTag -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_CreateMinorTag -eq 'true'
     $datePrereleaseFormat = ![string]::IsNullOrEmpty($configuration.DatePrereleaseFormat) ? $configuration.DatePrereleaseFormat : $env:PSMODULE_AUTO_RELEASE_INPUT_DatePrereleaseFormat
     $incrementalPrerelease = ![string]::IsNullOrEmpty($configuration.IncrementalPrerelease) ? $configuration.IncrementalPrerelease -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_IncrementalPrerelease -eq 'true'
+    $usePRBodyAsReleaseNotes = ![string]::IsNullOrEmpty($configuration.UsePRBodyAsReleaseNotes) ? $configuration.UsePRBodyAsReleaseNotes -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_UsePRBodyAsReleaseNotes -eq 'true'
+    $usePRTitleAsReleaseName = ![string]::IsNullOrEmpty($configuration.UsePRTitleAsReleaseName) ? $configuration.UsePRTitleAsReleaseName -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_UsePRTitleAsReleaseName -eq 'true'
     $versionPrefix = ![string]::IsNullOrEmpty($configuration.VersionPrefix) ? $configuration.VersionPrefix : $env:PSMODULE_AUTO_RELEASE_INPUT_VersionPrefix
     $whatIf = ![string]::IsNullOrEmpty($configuration.WhatIf) ? $configuration.WhatIf -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_WhatIf -eq 'true'
 
@@ -60,6 +62,8 @@ LogGroup 'Set configuration' {
     Write-Output "Create minor tag enabled:       [$createMinorTag]"
     Write-Output "Date-based prerelease format:   [$datePrereleaseFormat]"
     Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
+    Write-Output "Use PR body as release notes:   [$usePRBodyAsReleaseNotes]"
+    Write-Output "Use PR title as release name:   [$usePRTitleAsReleaseName]"
     Write-Output "Version prefix:                 [$versionPrefix]"
     Write-Output "What if mode:                   [$whatIf]"
     Write-Output ''
@@ -226,10 +230,35 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 }
             }
 
-            if ($whatIf) {
-                Write-Output "WhatIf: gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease"
+            # Build release creation command with options
+            $releaseCreateCommand = "gh release create $newVersion"
+
+            # Add title parameter
+            if ($usePRTitleAsReleaseName) {
+                $prTitle = $pull_request.title
+                $releaseCreateCommand += " --title '$prTitle'"
+                Write-Output "Using PR title as release name: [$prTitle]"
             } else {
-                $releaseURL = gh release create $newVersion --title $newVersion --target $prHeadRef --generate-notes --prerelease
+                $releaseCreateCommand += " --title $newVersion"
+            }
+
+            # Add notes parameter
+            if ($usePRBodyAsReleaseNotes) {
+                $prBody = $pull_request.body
+                $releaseCreateCommand += " --notes '$prBody'"
+                Write-Output 'Using PR body as release notes'
+            } else {
+                $releaseCreateCommand += ' --generate-notes'
+            }
+
+            # Add remaining parameters
+            $releaseCreateCommand += " --target $prHeadRef --prerelease"
+
+            if ($whatIf) {
+                Write-Output "WhatIf: $releaseCreateCommand"
+            } else {
+                # Execute the command and capture the output
+                $releaseURL = & $releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Failed to create the release [$newVersion]."
                     exit $LASTEXITCODE
@@ -246,10 +275,32 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 }
             }
         } else {
-            if ($whatIf) {
-                Write-Output "WhatIf: gh release create $newVersion --title $newVersion --generate-notes"
+            # Build release creation command with options
+            $releaseCreateCommand = "gh release create $newVersion"
+
+            # Add title parameter
+            if ($usePRTitleAsReleaseName) {
+                $prTitle = $pull_request.title
+                $releaseCreateCommand += " --title '$prTitle'"
+                Write-Output "Using PR title as release name: [$prTitle]"
             } else {
-                gh release create $newVersion --title $newVersion --generate-notes
+                $releaseCreateCommand += " --title $newVersion"
+            }
+
+            # Add notes parameter
+            if ($usePRBodyAsReleaseNotes) {
+                $prBody = $pull_request.body
+                $releaseCreateCommand += " --notes '$prBody'"
+                Write-Output 'Using PR body as release notes'
+            } else {
+                $releaseCreateCommand += ' --generate-notes'
+            }
+
+            if ($whatIf) {
+                Write-Output "WhatIf: $releaseCreateCommand"
+            } else {
+                # Execute the command
+                & $releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Failed to create the release [$newVersion]."
                     exit $LASTEXITCODE

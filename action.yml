@@ -50,6 +50,14 @@ inputs:
     description: A comma separated list of labels that trigger a patch release.
     required: false
     default: patch, fix
+  UsePRBodyAsReleaseNotes:
+    description: When enabled, uses the pull request body as the release notes for the GitHub release.
+    required: false
+    default: 'false'
+  UsePRTitleAsReleaseName:
+    description: When enabled, uses the pull request title as the name for the GitHub release.
+    required: false
+    default: 'false'
   VersionPrefix:
     description: The prefix to use for the version number.
     required: false
@@ -95,6 +103,8 @@ runs:
         PSMODULE_AUTO_RELEASE_INPUT_MajorLabels: ${{ inputs.MajorLabels }}
         PSMODULE_AUTO_RELEASE_INPUT_MinorLabels: ${{ inputs.MinorLabels }}
         PSMODULE_AUTO_RELEASE_INPUT_PatchLabels: ${{ inputs.PatchLabels }}
+        PSMODULE_AUTO_RELEASE_INPUT_UsePRBodyAsReleaseNotes: ${{ inputs.UsePRBodyAsReleaseNotes }}
+        PSMODULE_AUTO_RELEASE_INPUT_UsePRTitleAsReleaseName: ${{ inputs.UsePRTitleAsReleaseName }}
         PSMODULE_AUTO_RELEASE_INPUT_VersionPrefix: ${{ inputs.VersionPrefix }}
         PSMODULE_AUTO_RELEASE_INPUT_WhatIf: ${{ inputs.WhatIf }}
       with:
