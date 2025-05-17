@@ -47,6 +47,7 @@ LogGroup 'Set configuration' {
     $incrementalPrerelease = ![string]::IsNullOrEmpty($configuration.IncrementalPrerelease) ? $configuration.IncrementalPrerelease -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_IncrementalPrerelease -eq 'true'
     $usePRBodyAsReleaseNotes = ![string]::IsNullOrEmpty($configuration.UsePRBodyAsReleaseNotes) ? $configuration.UsePRBodyAsReleaseNotes -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_UsePRBodyAsReleaseNotes -eq 'true'
     $usePRTitleAsReleaseName = ![string]::IsNullOrEmpty($configuration.UsePRTitleAsReleaseName) ? $configuration.UsePRTitleAsReleaseName -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_UsePRTitleAsReleaseName -eq 'true'
+    $usePRTitleAsNotesHeading = ![string]::IsNullOrEmpty($configuration.UsePRTitleAsNotesHeading) ? $configuration.UsePRTitleAsNotesHeading -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_UsePRTitleAsNotesHeading -eq 'true'
     $versionPrefix = ![string]::IsNullOrEmpty($configuration.VersionPrefix) ? $configuration.VersionPrefix : $env:PSMODULE_AUTO_RELEASE_INPUT_VersionPrefix
     $whatIf = ![string]::IsNullOrEmpty($configuration.WhatIf) ? $configuration.WhatIf -eq 'true' : $env:PSMODULE_AUTO_RELEASE_INPUT_WhatIf -eq 'true'
 
@@ -64,6 +65,7 @@ LogGroup 'Set configuration' {
     Write-Output "Incremental prerelease enabled: [$incrementalPrerelease]"
     Write-Output "Use PR body as release notes:   [$usePRBodyAsReleaseNotes]"
     Write-Output "Use PR title as release name:   [$usePRTitleAsReleaseName]"
+    Write-Output "Use PR title as notes heading:  [$usePRTitleAsNotesHeading]"
     Write-Output "Version prefix:                 [$versionPrefix]"
     Write-Output "What if mode:                   [$whatIf]"
     Write-Output ''
@@ -243,7 +245,14 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
 
             # Add notes parameter
-            if ($usePRBodyAsReleaseNotes) {
+            if ($usePRTitleAsNotesHeading) {
+                $prTitle = $pull_request.title
+                $prNumber = $pull_request.number
+                $prBody = $pull_request.body
+                $notes = "# $prTitle (#$prNumber)`n`n$prBody"
+                $releaseCreateCommand += @("--notes", "$notes")
+                Write-Output 'Using PR title as H1 heading with link and body as release notes'
+            } elseif ($usePRBodyAsReleaseNotes) {
                 $prBody = $pull_request.body
                 $releaseCreateCommand += @("--notes", "$prBody")
                 Write-Output 'Using PR body as release notes'
@@ -288,7 +297,14 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
 
             # Add notes parameter
-            if ($usePRBodyAsReleaseNotes) {
+            if ($usePRTitleAsNotesHeading) {
+                $prTitle = $pull_request.title
+                $prNumber = $pull_request.number
+                $prBody = $pull_request.body
+                $notes = "# $prTitle (#$prNumber)`n`n$prBody"
+                $releaseCreateCommand += @("--notes", "$notes")
+                Write-Output 'Using PR title as H1 heading with link and body as release notes'
+            } elseif ($usePRBodyAsReleaseNotes) {
                 $prBody = $pull_request.body
                 $releaseCreateCommand += @("--notes", "$prBody")
                 Write-Output 'Using PR body as release notes'
