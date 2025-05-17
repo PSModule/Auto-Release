@@ -247,10 +247,11 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             # Add notes parameter
             if ($usePRTitleAsNotesHeading) {
                 $prTitle = $pull_request.title
+                $prNumber = $pull_request.number
                 $prBody = $pull_request.body
-                $notes = "## $prTitle`n`n$prBody"
+                $notes = "# $prTitle (#$prNumber)`n`n$prBody"
                 $releaseCreateCommand += @("--notes", "$notes")
-                Write-Output 'Using PR title as H2 heading and body as release notes'
+                Write-Output 'Using PR title as H1 heading with link and body as release notes'
             } elseif ($usePRBodyAsReleaseNotes) {
                 $prBody = $pull_request.body
                 $releaseCreateCommand += @("--notes", "$prBody")
@@ -298,10 +299,11 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             # Add notes parameter
             if ($usePRTitleAsNotesHeading) {
                 $prTitle = $pull_request.title
+                $prNumber = $pull_request.number
                 $prBody = $pull_request.body
-                $notes = "## $prTitle`n`n$prBody"
+                $notes = "# $prTitle (#$prNumber)`n`n$prBody"
                 $releaseCreateCommand += @("--notes", "$notes")
-                Write-Output 'Using PR title as H2 heading and body as release notes'
+                Write-Output 'Using PR title as H1 heading with link and body as release notes'
             } elseif ($usePRBodyAsReleaseNotes) {
                 $prBody = $pull_request.body
                 $releaseCreateCommand += @("--notes", "$prBody")
