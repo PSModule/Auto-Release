@@ -245,19 +245,23 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
 
             # Add notes parameter
+            $notes = ""
             if ($usePRTitleAsNotesHeading) {
                 $prTitle = $pull_request.title
                 $prNumber = $pull_request.number
+                $notes += "# $prTitle (#$prNumber)`n`n"
+            }
+            if ($usePRBodyAsReleaseNotes) {
                 $prBody = $pull_request.body
-                $notes = "# $prTitle (#$prNumber)`n`n$prBody"
-                $releaseCreateCommand += @("--notes", "$notes")
-                Write-Output 'Using PR title as H1 heading with link and body as release notes'
-            } elseif ($usePRBodyAsReleaseNotes) {
-                $prBody = $pull_request.body
-                $releaseCreateCommand += @("--notes", "$prBody")
-                Write-Output 'Using PR body as release notes'
+                $notes += $prBody
+            }
+            Write-Output 'gh arguments:'
+            if (-not [string]::IsNullOrWhiteSpace($notes)) {
+                $releaseCreateCommand += @('--notes', $notes)
+                Write-Output "$($releaseCreateCommand -join ' ')"
             } else {
                 $releaseCreateCommand += '--generate-notes'
+                Write-Output "$($releaseCreateCommand -join ' ')"
             }
 
             # Add remaining parameters
@@ -297,19 +301,23 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
 
             # Add notes parameter
+            $notes = ""
             if ($usePRTitleAsNotesHeading) {
                 $prTitle = $pull_request.title
                 $prNumber = $pull_request.number
+                $notes += "# $prTitle (#$prNumber)`n`n"
+            }
+            if ($usePRBodyAsReleaseNotes) {
                 $prBody = $pull_request.body
-                $notes = "# $prTitle (#$prNumber)`n`n$prBody"
-                $releaseCreateCommand += @("--notes", "$notes")
-                Write-Output 'Using PR title as H1 heading with link and body as release notes'
-            } elseif ($usePRBodyAsReleaseNotes) {
-                $prBody = $pull_request.body
-                $releaseCreateCommand += @("--notes", "$prBody")
-                Write-Output 'Using PR body as release notes'
+                $notes += $prBody
+            }
+            Write-Output "gh arguments:"
+            if (-not [string]::IsNullOrWhiteSpace($notes)) {
+                $releaseCreateCommand += @('--notes', $notes)
+                Write-Output "$($releaseCreateCommand -join ' ')"
             } else {
                 $releaseCreateCommand += '--generate-notes'
+                Write-Output "$($releaseCreateCommand -join ' ')"
             }
 
             if ($whatIf) {
