@@ -233,19 +233,19 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
 
             # Build release creation command with options
-            $releaseCreateCommand = @("release", "create", "$newVersion")
+            $releaseCreateCommand = @('release', 'create', "$newVersion")
 
             # Add title parameter
             if ($usePRTitleAsReleaseName) {
                 $prTitle = $pull_request.title
-                $releaseCreateCommand += @("--title", "$prTitle")
+                $releaseCreateCommand += @('--title', "$prTitle")
                 Write-Output "Using PR title as release name: [$prTitle]"
             } else {
-                $releaseCreateCommand += @("--title", "$newVersion")
+                $releaseCreateCommand += @('--title', "$newVersion")
             }
 
             # Add notes parameter
-            $notes = ""
+            $notes = ''
             if ($usePRTitleAsNotesHeading) {
                 $prTitle = $pull_request.title
                 $prNumber = $pull_request.number
@@ -255,21 +255,17 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 $prBody = $pull_request.body
                 $notes += $prBody
             }
-            Write-Output 'gh arguments:'
             if (-not [string]::IsNullOrWhiteSpace($notes)) {
                 $releaseCreateCommand += @('--notes', $notes)
-                Write-Output "$($releaseCreateCommand -join ' ')"
             } else {
                 $releaseCreateCommand += '--generate-notes'
-                Write-Output "$($releaseCreateCommand -join ' ')"
             }
 
             # Add remaining parameters
-            $releaseCreateCommand += @("--target", $prHeadRef, "--prerelease")
+            $releaseCreateCommand += @('--target', $prHeadRef, '--prerelease')
 
-            if ($whatIf) {
-                Write-Output "WhatIf: $releaseCreateCommand"
-            } else {
+            Write-Output "gh $($releaseCreateCommand -join ' ')"
+            if (-not $whatIf) {
                 # Execute the command and capture the output
                 $releaseURL = gh @releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
@@ -289,19 +285,19 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
             }
         } else {
             # Build release creation command with options
-            $releaseCreateCommand = @("release", "create", "$newVersion")
+            $releaseCreateCommand = @('release', 'create', "$newVersion")
 
             # Add title parameter
             if ($usePRTitleAsReleaseName) {
                 $prTitle = $pull_request.title
-                $releaseCreateCommand += @("--title", "$prTitle")
+                $releaseCreateCommand += @('--title', "$prTitle")
                 Write-Output "Using PR title as release name: [$prTitle]"
             } else {
-                $releaseCreateCommand += @("--title", "$newVersion")
+                $releaseCreateCommand += @('--title', "$newVersion")
             }
 
             # Add notes parameter
-            $notes = ""
+            $notes = ''
             if ($usePRTitleAsNotesHeading) {
                 $prTitle = $pull_request.title
                 $prNumber = $pull_request.number
@@ -311,19 +307,14 @@ if ($createPrerelease -or $createRelease -or $whatIf) {
                 $prBody = $pull_request.body
                 $notes += $prBody
             }
-            Write-Output "gh arguments:"
             if (-not [string]::IsNullOrWhiteSpace($notes)) {
                 $releaseCreateCommand += @('--notes', $notes)
-                Write-Output "$($releaseCreateCommand -join ' ')"
             } else {
                 $releaseCreateCommand += '--generate-notes'
-                Write-Output "$($releaseCreateCommand -join ' ')"
             }
 
-            if ($whatIf) {
-                Write-Output "WhatIf: $releaseCreateCommand"
-            } else {
-                # Execute the command
+            Write-Output "gh $($releaseCreateCommand -join ' ')"
+            if (-not $whatIf) {
                 gh @releaseCreateCommand
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Failed to create the release [$newVersion]."
