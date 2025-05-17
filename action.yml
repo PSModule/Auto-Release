@@ -58,6 +58,10 @@ inputs:
     description: When enabled, uses the pull request body as the release notes for the GitHub release.
     required: false
     default: 'true'
+  UsePRTitleAsNotesHeading:
+    description: When enabled, the release notes will begin with the pull request title as a H2 heading followed by the pull request body.
+    required: false
+    default: 'true'
   VersionPrefix:
     description: The prefix to use for the version number.
     required: false
@@ -105,6 +109,7 @@ runs:
         PSMODULE_AUTO_RELEASE_INPUT_PatchLabels: ${{ inputs.PatchLabels }}
         PSMODULE_AUTO_RELEASE_INPUT_UsePRBodyAsReleaseNotes: ${{ inputs.UsePRBodyAsReleaseNotes }}
         PSMODULE_AUTO_RELEASE_INPUT_UsePRTitleAsReleaseName: ${{ inputs.UsePRTitleAsReleaseName }}
+        PSMODULE_AUTO_RELEASE_INPUT_UsePRTitleAsNotesHeading: ${{ inputs.UsePRTitleAsNotesHeading }}
         PSMODULE_AUTO_RELEASE_INPUT_VersionPrefix: ${{ inputs.VersionPrefix }}
         PSMODULE_AUTO_RELEASE_INPUT_WhatIf: ${{ inputs.WhatIf }}
       with:
