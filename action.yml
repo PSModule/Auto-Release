@@ -117,6 +117,7 @@ runs:
         Prerelease: ${{ inputs.Prerelease }}
         Verbose: ${{ inputs.Verbose }}
         Version: ${{ inputs.Version }}
+        Name: Auto-Release
         WorkingDirectory: ${{ inputs.WorkingDirectory }}
         Script: |
           # Auto-Release
