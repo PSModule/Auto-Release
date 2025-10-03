@@ -7,9 +7,15 @@ version: 2
 updates:
   - package-ecosystem: github-actions # See documentation for possible values
     directory: / # Location of package manifests
+    labels:
+      - dependencies
+      - github-actions
     schedule:
       interval: weekly
   - package-ecosystem: nuget # See documentation for possible values
     directory: / # Location of package manifests
+    labels:
+      - dependencies
+      - nuget
     schedule:
       interval: weekly
